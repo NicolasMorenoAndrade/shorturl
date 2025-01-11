@@ -33,6 +33,16 @@
              (h/values [[url slug]])
              (sql/format))))
 
+(defn remove-by-slug! [slug]
+  (query (-> (h/delete-from :shortened_urls)
+             (h/where [:= :short_code slug])
+             (sql/format))))
+
+(defn remove-by-url! [url]
+  (query (-> (h/delete-from :shortened_urls)
+             (h/where [:= :original_url url])
+             (sql/format))))
+
 (comment
 ;; Test connection
 (jdbc/execute! ds ["SELECT 1"])
@@ -74,7 +84,13 @@
             [["https://github.com/seancorfield/honeysql" "abc"]])
            (sql/format)))
 
-(get-url "XFJP")
+(query (-> (h/insert-into :shortened_urls)
+           (h/columns :original_url :short_code)
+           (h/values
+            [["https://www.youtube.com/watch?v=V-dBmuRsW6w&t=546s" "shorturlFE"]])
+           (sql/format)))
+
+(get-url "shorturlFE")
 
 (query (-> (h/select :*)
            (h/from :shortened_urls)
@@ -82,4 +98,7 @@
            (sql/format)))
 
 (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
+
+;; (remove-by-slug! "shorturlFE")
+(remove-by-url! "https://github.com/seancorfield/honeysql")
 )

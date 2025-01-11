@@ -1,4 +1,17 @@
+# Dev environment
 .cpcache/
 .nrepl-port
+.shadow-cljs/
+.dir-locals.el
 .clj-kondo/.cache
 .lsp/.cache
+
+# Node
+node_modules/
+package-lock.json
+
+# Build output
+resources/public/assets/js/
+
+# Environment variables
+env.edn

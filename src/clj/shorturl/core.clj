@@ -10,22 +10,22 @@
 
 
 (defn redirect [req]
-  ;; {:body "hello2" :status 200}
-  (let [slug (get-in req [:path-params :short_code])
-        url (db/get-url slug)]
-    (if url
-      ;; (r/response url)
+  (if-let [slug (get-in req [:path-params :short_code])]
+    (if-let [url (db/get-url slug)]
       (r/redirect url 307)
-      (r/not-found "Not found"))))
+      (r/status (r/response {:error "URL not found"}) 404))
+    (r/status (r/response {:error "Slug is required"}) 400)))
 
 
 (defn create-redirect [req]
-  (let [url (get-in req [:body-params :url])
-        slug (generate-slug)]
-    (db/insert-url-redirection! url slug)
-    (r/response (str "create slug " slug))
-    )
-  )
+  (if-let [url (get-in req [:body-params :url])]
+    (try
+      (let [slug (generate-slug)]
+        (db/insert-url-redirection! url slug)
+        (r/response {:slug slug :url url}))
+      (catch Exception e
+        (r/status (r/response {:error (.getMessage e)}) 500)))
+    (r/status (r/response {:error "URL is required"}) 400)))
 
 
 (def app
