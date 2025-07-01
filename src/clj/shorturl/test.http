@@ -1,12 +1,12 @@
-GET http://localhost:3001/
+# GET http://localhost:3001/backend/
 
 
-# POST http://localhost:3001/api/redirect/
-# Content-Type: application/json
+POST http://localhost:3001/api/redirect/
+Content-Type: application/json
 
-# {
-#     "url": "https://www.youtube.com/watch?v=0mrguRPgCzI&t=1936s"
-# }
+{
+     "url": "https://www.youtube.com/watch?v=0mrguRPgCzI&t=1936s"
+}
 
 
 # Content-Type: application/json

@@ -27,7 +27,7 @@
   "Drops the shortened_urls table if it exists.
 
    This will completely remove the table and all of its data.
-   Use with caution, especially in production environments.
+   USE WITH CAUTION!, especially in production environments.
 
    Parameters:
    - cascade: (optional) If true, drops dependent objects like constraints. Default: false
@@ -35,12 +35,9 @@
    Returns:
    - The result of the drop table operation"
   ([]
-   (drop-shortened-urls-table! false))
-  ([cascade]
    (query
     (sql/format
-     {:drop-table [:shortened_urls :if-exists]
-      :cascade cascade}))))
+     {:drop-table [:if-exists :shortened_urls]}))))
 
 (defn run-migrations!
   "Runs all migrations to set up the database schema.
@@ -51,4 +48,5 @@
 
 (comment
   (run-migrations!)
+  (drop-shortened-urls-table!)
   )

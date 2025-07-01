@@ -110,14 +110,14 @@
 (query (-> (h/insert-into :shortened_urls)
            (h/columns :original_url :short_code)
            (h/values
-            [["https://www.youtube.com/watch?v=V-dBmuRsW6w&t=546s" "shorturlFE"]])
+            [["https://www.youtube.com/watch?v=0mrguRPgCzI&t=477s" "backend"]])
            (sql/format)))
 
 (get-url "shorturlFE")
 
 (query (-> (h/select :*)
            (h/from :shortened_urls)
-           (h/where [:= :short_code "abc"])
+           (h/where [:= :short_code "backend"])
            (sql/format)))
 
 (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
