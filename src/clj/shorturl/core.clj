@@ -52,24 +52,12 @@
      "/"
      [":short_code/" redirect ]
      ["api/"
-      ;; ["redirect/" {:post create-redirect}]]
+      ["redirect/" {:post create-redirect}]]
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]
      ["" {:handler (fn [req] {:body (index) :status 200})}]
      ]
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware]}})))
-
-;; (def app
-;;   (ring/ring-handler
-;;    (ring/router
-;;     ["/"
-;;      ["" {:handler (fn [req] {:body "hello" :status 200})}]
-;;      ]
-;;     {:data {:muuntaja m/instance
-;;             :middleware [muuntaja/format-middleware]}}
-;;     )
-;;    )
-;;   )
 
 (defn start []
   (ring-jetty/run-jetty #'app {:port 3001

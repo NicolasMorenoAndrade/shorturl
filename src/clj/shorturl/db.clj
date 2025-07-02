@@ -113,7 +113,7 @@
             [["https://www.youtube.com/watch?v=0mrguRPgCzI&t=477s" "backend"]])
            (sql/format)))
 
-(get-url "shorturlFE")
+(get-url "ODLF")
 
 (query (-> (h/select :*)
            (h/from :shortened_urls)
