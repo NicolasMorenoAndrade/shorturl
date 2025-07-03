@@ -1,0 +1,56 @@
+
+
+* core.clj
+
+This is where the app server is defined.
+
+=# Explaining =(ring-jetty/run-jetty #'app {:port port :join? false})=
+
+This line starts the Jetty web server with your Ring application. Let's break down the syntax:
+
+** =ring-jetty/run-jetty=
+
+- =ring-jetty= is a namespace alias for =ring.adapter.jetty=
+- =run-jetty= is a function from that namespace that starts a Jetty server
+
+** =#'app=
+
+- =#'= is Clojure's var quote syntax (similar to =var= in other Lisps)
+- It creates a reference to the var itself rather than its current value
+- Using =#'app= instead of just =app= ensures that:
+  1. If you redefine =app= later (e.g., during development), the server will use the updated definition
+  2. The server will always use the most current version of your routes/handlers
+  3. You can reload your application code without restarting the server
+
+** ={:port port :join? false}=
+
+This is a map of options passed to the Jetty server:
+
+- =:port port= - The port on which the server will listen (using the value of the =port= variable)
+- =:join? false= - This is crucial for REPL-based development:
+  - When =false=, the server runs in a separate thread and doesn't block the current thread
+  - This allows your REPL to remain responsive while the server is running
+  - If set to =true= (the default), the server would block the current thread until shutdown
+
+In summary, this line starts a Jetty server with your Ring application in a non-blocking manner, allowing the server to pick up code changes without requiring a restart - ideal for interactive development with a REPL.
+
+** Start URL shortener server
+Start the server from the REPL with:
+#+begin_src clojure
+(start-server! 3001)
+#+end_src
+
+Start the server from the command line (default port 3001) with:
+#+begin_src bash
+clj -M -m shorturl.core
+#+end_src
+
+If you want to specify a different port:
+#+begin_src bash
+clj -M -m shorturl.core 8080
+#+end_src
+
+Stop the server from the REPL with:
+#+begin_src clojure
+(stop-server!)
+#+end_src

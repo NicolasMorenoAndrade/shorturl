@@ -6,6 +6,7 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [shorturl.db :as db]
             [shorturl.slug :refer [generate-slug]]
+            [shorturl.migrations :as migrations]
             [clojure.java.io :as io])
   (:gen-class))
 
@@ -49,27 +50,53 @@
   (ring/ring-handler
    (ring/router
     [
+     ["" {:handler (fn [req] {:body (index) :status 200})}]
      "/"
-     [":short_code/" redirect ]
+
+     [":short_code/" redirect]
+
      ["api/"
       ["redirect/" {:post create-redirect}]]
+
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]
-     ["" {:handler (fn [req] {:body (index) :status 200})}]
+
+
      ]
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware]}})))
 
-(defn start []
-  (ring-jetty/run-jetty #'app {:port 3001
-                               :join? false}))
+(defonce server (atom nil))
+
+(defn start-server! [port]
+  (println "Starting server on port" port)
+  (migrations/run-migrations!)
+  (reset! server (ring-jetty/run-jetty #'app {:port port :join? false})))
+
+(defn stop-server! []
+  (when @server
+    (println "Stopping server...")
+    (.stop @server)
+    (reset! server nil)))
+
+(defn restart-server! [port]
+  (stop-server!)
+  (start-server! port))
+
+(defn -main [& args]
+  (let [port (if (seq args)
+               (Integer/parseInt (first args))
+               3001)]
+    (start-server! port)))
 
 (comment
+  ;; (defn start []
+  ;;   (ring-jetty/run-jetty #'app {:port 3001
+  ;;                                :join? false}))
+  ;; (def server (start))
+  ;; (.stop server)
 
-  (def server (start))
-
-  (.stop server)
+  (start-server! 3001)
+  (stop-server!)
 
   (index)
-
-
-)
+  )
