@@ -1,40 +1,52 @@
 
 
-* core.clj
+* URL shortener
 
-This is where the app server is defined.
+A full-stack URL shortening application built with Clojure, ClojureScript, and PostgreSQL.
 
-=# Explaining =(ring-jetty/run-jetty #'app {:port port :join? false})=
+** Overview
 
-This line starts the Jetty web server with your Ring application. Let's break down the syntax:
+This application allows users to create shortened URLs through a simple web interface. The system consists of:
 
-** =ring-jetty/run-jetty=
+- *Backend*: Clojure service using Ring, Reitit, and Jetty
+- *Frontend*: ClojureScript UI built with Helix (React wrapper)
+- *Database*: PostgreSQL for storing URL mappings
 
-- =ring-jetty= is a namespace alias for =ring.adapter.jetty=
-- =run-jetty= is a function from that namespace that starts a Jetty server
+** Setup and Installation
 
-** =#'app=
+*** Prerequisites
 
-- =#'= is Clojure's var quote syntax (similar to =var= in other Lisps)
-- It creates a reference to the var itself rather than its current value
-- Using =#'app= instead of just =app= ensures that:
-  1. If you redefine =app= later (e.g., during development), the server will use the updated definition
-  2. The server will always use the most current version of your routes/handlers
-  3. You can reload your application code without restarting the server
+- Clojure
+- PostgreSQL database
+- Node.js (for frontend development)
 
-** ={:port port :join? false}=
+*** Database Configuration
 
-This is a map of options passed to the Jetty server:
+The application requires the following environment variables for database connection.
+These are defined in env.edn which fetches the DB_USER and DB_PASSWORD from the system environment.
 
-- =:port port= - The port on which the server will listen (using the value of the =port= variable)
-- =:join? false= - This is crucial for REPL-based development:
-  - When =false=, the server runs in a separate thread and doesn't block the current thread
-  - This allows your REPL to remain responsive while the server is running
-  - If set to =true= (the default), the server would block the current thread until shutdown
+#+begin_src
+DBNAME=your_database_name
+HOST=database_host
+SHORTURL_DB_USER=database_user
+SHORTURL_DB_PASSWORD=database_password
+SSL=true_or_false
+SSLMODE=require_or_prefer
+#+end_src
 
-In summary, this line starts a Jetty server with your Ring application in a non-blocking manner, allowing the server to pick up code changes without requiring a restart - ideal for interactive development with a REPL.
+*** Initialize the Database
 
-** Start URL shortener server
+The application will automatically run migrations when started, but you can manually run them from the REPL:
+
+#+begin_src clojure
+(require '[shorturl.migrations :as migrations])
+(migrations/run-migrations!)
+#+end_src
+
+** Running the Application
+
+*** Backend Server
+
 Start the server from the REPL with:
 #+begin_src clojure
 (start-server! 3001)
@@ -54,3 +66,71 @@ Stop the server from the REPL with:
 #+begin_src clojure
 (stop-server!)
 #+end_src
+
+*** Frontend Development
+
+The frontend is built with Shadow-cljs. Run the development server with:
+
+#+begin_src bash
+npx shadow-cljs watch app
+#+end_src
+
+This will start the frontend server on port 5003, which proxies API requests to the backend on port 3001.
+
+** Architecture
+
+*** Backend (core.clj)
+
+This is where the app server is defined.
+
+**** =(ring-jetty/run-jetty #'app {:port port :join? false})=
+
+This line starts the Jetty web server with your Ring application. Let's break down the syntax:
+
+***** =ring-jetty/run-jetty=
+
+- =ring-jetty= is a namespace alias for =ring.adapter.jetty=
+- =run-jetty= is a function from that namespace that starts a Jetty server
+
+***** =#'app=
+
+- =#'= is Clojure's var quote syntax (similar to =var= in other Lisps)
+- It creates a reference to the var itself rather than its current value
+- Using =#'app= instead of just =app= ensures that:
+  1. If you redefine =app= later (e.g., during development), the server will use the updated definition
+  2. The server will always use the most current version of your routes/handlers
+  3. You can reload your application code without restarting the server
+
+***** ={:port port :join? false}=
+
+This is a map of options passed to the Jetty server:
+
+- =:port port= - The port on which the server will listen (using the value of the =port= variable)
+- =:join? false= - This is crucial for REPL-based development:
+  - When =false=, the server runs in a separate thread and doesn't block the current thread
+  - This allows your REPL to remain responsive while the server is running
+  - If set to =true= (the default), the server would block the current thread until shutdown
+
+In summary, this line starts a Jetty server with your Ring application in a non-blocking manner, allowing the server to pick up code changes without requiring a restart - ideal for interactive development with a REPL.
+
+*** Database (db.clj)
+
+The database layer uses next.jdbc with HoneySQL for SQL generation. Key functions:
+
+- =get-url= - Retrieve the original URL for a given short code
+- =insert-url-redirection!= - Create a new URL mapping
+- =remove-by-slug!= - Delete a URL redirection by its short code
+- =remove-by-url!= - Delete a URL redirection by its original URL
+
+*** Frontend (core.cljs)
+
+The frontend is a simple React application using Helix that allows users to:
+1. Enter a URL to be shortened
+2. Submit the URL to the API
+3. View and copy the resulting shortened URL
+
+** Development Notes
+
+During development, the backend and frontend can be run simultaneously:
+1. Start the backend on port 3001
+2. Start shadow-cljs on port 5003 (configured to proxy API requests to port 3001)

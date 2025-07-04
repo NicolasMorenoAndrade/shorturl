@@ -20,7 +20,7 @@
         (str (.-origin js/window.location) "/" (:slug state) "/")
         ]
 
-    (d/div {:class-name "bg-pink-100 grid place-items-center h-screen"}
+    (d/div {:class-name "bg-purple-100 grid place-items-center h-screen"}
      (if (:slug state)
        (d/div (d/a {:href redirect-link
                     :class-name "text-blue-500 hover:text-purple-600"} redirect-link))
