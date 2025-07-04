@@ -20,13 +20,18 @@
         (str (.-origin js/window.location) "/" (:slug state) "/")
         ]
 
-    (d/div
+    (d/div {:class-name "bg-pink-100 grid place-items-center h-screen"}
      (if (:slug state)
-       (d/div (d/a {:href redirect-link} redirect-link))
+       (d/div (d/a {:href redirect-link
+                    :class-name "text-blue-500 hover:text-purple-600"} redirect-link))
        (d/div
         (d/input {:value (:url state)
-                  :on-change #(set-state assoc :url (.. % -target -value))})
-        (d/button {:on-click #(fetch-slug)} "Shorten URL"))))))
+                  :on-change #(set-state assoc :url (.. % -target -value))
+                  :class-name "form-control border border-solid border-gray-600"
+                  :placeholder "Enter URL"})
+        (d/button {:on-click #(fetch-slug)
+                   :class-name "border-1 rounded px-4 uppercase"}
+"Shorten URL"))))))
 
 
 (defn ^:export init []

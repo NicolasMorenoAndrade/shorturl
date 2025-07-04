@@ -49,18 +49,12 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [
-     ["" {:handler (fn [req] {:body (index) :status 200})}]
-     "/"
-
+    ["/"
      [":short_code/" redirect]
-
      ["api/"
       ["redirect/" {:post create-redirect}]]
-
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]
-
-
+     ["" {:handler (fn [req] {:body (index) :status 200})}]
      ]
     {:data {:muuntaja m/instance
             :middleware [muuntaja/format-middleware]}})))
