@@ -1,0 +1,16 @@
+{:linters {:unused-namespace {:level :warning}
+           :unused-referred-var {:level :warning}
+           :unused-private-var {:level :warning}
+           :consistent-alias {:level :warning
+                              :aliases {clojure.string str
+                                        clojure.set set
+                                        next.jdbc jdbc
+                                        honey.sql sql
+                                        honey.sql.helpers h}}
+           :redundant-let {:level :warning}
+           :redundant-do {:level :warning}
+           :unresolved-symbol {:level :error}
+           :unresolved-namespace {:level :error}}
+
+ :lint-as {helix.core/defnc clojure.core/defn
+           promesa.core/let clojure.core/let}}

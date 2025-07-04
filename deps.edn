@@ -11,9 +11,9 @@
         funcool/promesa {:mvn/version "11.0.678"}}
  :aliases
  {
-  ;; :lint
-  ;; {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}
-  ;;  :main-opts ["-m" "clj-kondo.main" "--lint" "src" "test"]}
+  :lint
+  {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}
+   :main-opts ["-m" "clj-kondo.main" "--lint" "src" "test"]}
 
   :cljs
   {:extra-deps {thheller/shadow-cljs {:mvn/version "2.28.20"}
