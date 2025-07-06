@@ -1,5 +1,4 @@
 
-
 * URL shortener
 
 A full-stack URL shortening application built with Clojure, ClojureScript, and PostgreSQL.
@@ -134,3 +133,6 @@ The frontend is a simple React application using Helix that allows users to:
 During development, the backend and frontend can be run simultaneously:
 1. Start the backend on port 3001
 2. Start shadow-cljs on port 5003 (configured to proxy API requests to port 3001)
+
+** Credits
+this is based in this [[https://www.youtube.com/watch?v=0mrguRPgCzI&t=485s][super cool youtube tutorial]] by Daniel Amber.
