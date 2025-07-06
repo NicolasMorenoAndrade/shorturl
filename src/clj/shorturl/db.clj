@@ -79,15 +79,8 @@
 
 (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
 
-
 (jdbc/execute! ds (sql/format {:select [:*]
                                :from [:shortened_urls]}))
-
-(->
- (h/select :a :b :c)
- (h/from :foo)
- (h/where [:= :foo.a "baz"])
- (sql/format))
 
 (jdbc/execute! ds
  (->

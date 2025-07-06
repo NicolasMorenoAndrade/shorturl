@@ -83,11 +83,6 @@
     (start-server! port)))
 
 (comment
-  ;; (defn start []
-  ;;   (ring-jetty/run-jetty #'app {:port 3001
-  ;;                                :join? false}))
-  ;; (def server (start))
-  ;; (.stop server)
 
   (start-server! 3001)
   (stop-server!)
