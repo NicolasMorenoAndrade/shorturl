@@ -48,5 +48,6 @@
 
 (comment
   (run-migrations!)
+  ;; TODO need better message when dropping table
   (drop-shortened-urls-table!)
   )
