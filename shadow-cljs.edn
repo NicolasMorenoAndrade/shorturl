@@ -4,4 +4,3 @@
                 :modules {:main {:init-fn app.core/init}}}}
  :dev-http {5003 {:root "resources/public"
                   :proxy-url "http://localhost:3001"}}}
-;; :dev-http {5003 "resources/public"}
