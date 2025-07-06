@@ -16,7 +16,7 @@
    Looks up the slug in the database and redirects to the original URL if found.
    Returns a 404 if the slug doesn't exist or 400 if no slug is provided."
   [req]
-  (if-let [slug (get-in req [:path-params :short_code])]
+  (if-let [slug (get-in req [:path-params :slug])]
     (if-let [url (db/get-url slug)]
       (r/redirect url 307)
       (r/status (r/response {:error "URL not found"}) 404))
@@ -50,7 +50,7 @@
   (ring/ring-handler
    (ring/router
     ["/"
-     [":short_code/" redirect]
+     [":slug/" redirect]
      ["api/"
       ["redirect/" {:post create-redirect}]]
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]

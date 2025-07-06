@@ -8,7 +8,7 @@
    This table stores URL redirections with columns for:
    - id: auto-incrementing primary key
    - original_url: the destination URL
-   - short_code: the unique slug/identifier for the short URL
+   - slug: the unique slug/identifier for the short URL
    - created_at: timestamp when the record was created
 
    Returns:
@@ -20,7 +20,7 @@
      :with-columns
      [[:id :serial [:primary-key]]
       [:original_url :text [:not nil]]
-      [:short_code [:varchar 10] [:not nil] [:unique]]
+      [:slug [:varchar 10] [:not nil] [:unique]]
       [:created_at :timestamp [:default :current_timestamp]]]})))
 
 (defn drop-shortened-urls-table!

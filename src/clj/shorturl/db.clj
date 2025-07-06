@@ -32,7 +32,7 @@
   [slug]
   (-> (query (-> (h/select :*)
                  (h/from :shortened_urls)
-                 (h/where [:= :short_code slug])
+                 (h/where [:= :slug slug])
                  (sql/format)))
       first
       :shortened_urls/original_url))
@@ -42,7 +42,7 @@
    Returns the result of the insert operation."
   [url slug]
   (query (-> (h/insert-into :shortened_urls)
-             (h/columns :original_url :short_code)
+             (h/columns :original_url :slug)
              (h/values [[url slug]])
              (sql/format))))
 
@@ -51,7 +51,7 @@
    Returns the result of the delete operation."
   [slug]
   (query (-> (h/delete-from :shortened_urls)
-             (h/where [:= :short_code slug])
+             (h/where [:= :slug slug])
              (sql/format))))
 
 (defn remove-by-url!
@@ -73,7 +73,7 @@
 (jdbc/execute! ds ["CREATE TABLE IF NOT EXISTS shortened_urls (
                     id SERIAL PRIMARY KEY,
                     original_url TEXT NOT NULL,
-                    short_code VARCHAR(10) UNIQUE NOT NULL,
+                    slug VARCHAR(10) UNIQUE NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                   )"])
 
@@ -102,13 +102,13 @@
 
 
 (query (-> (h/insert-into :shortened_urls)
-           (h/columns :original_url :short_code)
+           (h/columns :original_url :slug)
            (h/values
             [["https://github.com/seancorfield/honeysql" "abc"]])
            (sql/format)))
 
 (query (-> (h/insert-into :shortened_urls)
-           (h/columns :original_url :short_code)
+           (h/columns :original_url :slug)
            (h/values
             [["https://www.youtube.com/watch?v=0mrguRPgCzI&t=477s" "backend"]])
            (sql/format)))
@@ -117,7 +117,7 @@
 
 (query (-> (h/select :*)
            (h/from :shortened_urls)
-           (h/where [:= :short_code "backend"])
+           (h/where [:= :slug "backend"])
            (sql/format)))
 
 (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
