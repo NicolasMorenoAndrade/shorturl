@@ -1,5 +1,5 @@
 (ns shorturl.migrations
-  (:require [shorturl.db :refer [query]]
+  (:require [shorturl.db :refer [execute-query]]
             [honey.sql :as sql]))
 
 (defn create-shortened-urls-table!
@@ -14,7 +14,7 @@
    Returns:
    - The result of the create table operation"
   []
-  (query
+  (execute-query
    (sql/format
     {:create-table [:shortened_urls :if-not-exists]
      :with-columns
@@ -35,7 +35,7 @@
    Returns:
    - The result of the drop table operation"
   ([]
-   (query
+   (execute-query
     (sql/format
      {:drop-table [:if-exists :shortened_urls]}))))
 
