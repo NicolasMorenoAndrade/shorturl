@@ -31,9 +31,9 @@
    Returns nil if the slug doesn't exist."
   [slug]
   (-> (execute-query (-> (h/select :*)
-                 (h/from :shortened_urls)
-                 (h/where [:= :slug slug])
-                 (sql/format)))
+                         (h/from :shortened_urls)
+                         (h/where [:= :slug slug])
+                         (sql/format)))
       first
       :shortened_urls/original_url))
 
@@ -42,79 +42,76 @@
    Returns the result of the insert operation."
   [url slug]
   (execute-query (-> (h/insert-into :shortened_urls)
-             (h/columns :original_url :slug)
-             (h/values [[url slug]])
-             (sql/format))))
+                     (h/columns :original_url :slug)
+                     (h/values [[url slug]])
+                     (sql/format))))
 
 (defn remove-by-slug!
   "Delete a URL redirection by its short code/slug.
    Returns the result of the delete operation."
   [slug]
   (execute-query (-> (h/delete-from :shortened_urls)
-             (h/where [:= :slug slug])
-             (sql/format))))
+                     (h/where [:= :slug slug])
+                     (sql/format))))
 
 (defn remove-by-url!
   "Delete a URL redirection by its original URL.
    Returns the result of the delete operation."
   [url]
   (execute-query (-> (h/delete-from :shortened_urls)
-             (h/where [:= :original_url url])
-             (sql/format))))
-
+                     (h/where [:= :original_url url])
+                     (sql/format))))
 
 (comment
 ;; Test connection
-(jdbc/execute! ds ["SELECT 1"])
+  (jdbc/execute! ds ["SELECT 1"])
 
-(require '[shorturl.migrations :as mig])
-(mig/create-shortened-urls-table!)
+  (require '[shorturl.migrations :as mig])
+  (mig/create-shortened-urls-table!)
 
-(jdbc/execute! ds ["CREATE TABLE IF NOT EXISTS shortened_urls (
+  (jdbc/execute! ds ["CREATE TABLE IF NOT EXISTS shortened_urls (
                     id SERIAL PRIMARY KEY,
                     original_url TEXT NOT NULL,
                     slug VARCHAR(10) UNIQUE NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                   )"])
 
-(jdbc/execute! ds ["SELECT * FROM shortened_urls"])
+  (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
 
-(jdbc/execute! ds (sql/format {:select [:*]
-                               :from [:shortened_urls]}))
+  (jdbc/execute! ds (sql/format {:select [:*]
+                                 :from [:shortened_urls]}))
 
-(jdbc/execute! ds
- (->
- (h/select :*)
- (h/from :shortened_urls)
- (sql/format)))
+  (jdbc/execute! ds
+                 (->
+                  (h/select :*)
+                  (h/from :shortened_urls)
+                  (sql/format)))
 
-(execute-query  (->
- (h/select :*)
- (h/from :shortened_urls)
- (sql/format)))
+  (execute-query  (->
+                   (h/select :*)
+                   (h/from :shortened_urls)
+                   (sql/format)))
 
+  (execute-query (-> (h/insert-into :shortened_urls)
+                     (h/columns :original_url :slug)
+                     (h/values
+                      [["https://github.com/seancorfield/honeysql" "abc"]])
+                     (sql/format)))
 
-(execute-query (-> (h/insert-into :shortened_urls)
-           (h/columns :original_url :slug)
-           (h/values
-            [["https://github.com/seancorfield/honeysql" "abc"]])
-           (sql/format)))
+  (execute-query (-> (h/insert-into :shortened_urls)
+                     (h/columns :original_url :slug)
+                     (h/values
+                      [["https://www.youtube.com/watch?v=0mrguRPgCzI&t=477s" "backend"]])
+                     (sql/format)))
 
-(execute-query (-> (h/insert-into :shortened_urls)
-           (h/columns :original_url :slug)
-           (h/values
-            [["https://www.youtube.com/watch?v=0mrguRPgCzI&t=477s" "backend"]])
-           (sql/format)))
+  (get-url "PRTF")
 
-(get-url "PRTF")
+  (execute-query (-> (h/select :*)
+                     (h/from :shortened_urls)
+                     (h/where [:= :slug "backend"])
+                     (sql/format)))
 
-(execute-query (-> (h/select :*)
-           (h/from :shortened_urls)
-           (h/where [:= :slug "backend"])
-           (sql/format)))
+  (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
 
-(insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
-
-(remove-by-slug! "shorturlFE")
-(remove-by-url! "https://github.com/seancorfield/honeysql")
-)
+  (remove-by-slug! "shorturlFE")
+  (remove-by-url! "https://github.com/seancorfield/honeysql"))

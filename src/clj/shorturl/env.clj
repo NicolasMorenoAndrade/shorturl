@@ -7,10 +7,8 @@
   (or (k envvars)
       (System/getenv (name k))))
 
-
 (comment
 
   (System/getenv "SHORTURL_DB_PASSWORD")
   (env :DBTYPE)
-  (env :SHORTURL_DB_PASSWORD)
-  )
+  (env :SHORTURL_DB_PASSWORD))

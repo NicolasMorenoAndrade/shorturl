@@ -8,7 +8,7 @@ A full-stack URL shortening application built with Clojure, ClojureScript, and P
 This application allows users to create shortened URLs through a simple web interface. The system consists of:
 
 - *Backend*: Clojure service using Ring, Reitit, and Jetty
-- *Frontend*: ClojureScript UI built with Helix (React wrapper)
+- *Frontend*: ClojureScript UI built with Helix (React)
 - *Database*: PostgreSQL for storing URL mappings
 
 ** Setup and Installation
@@ -35,7 +35,7 @@ SSLMODE=require_or_prefer
 
 *** Initialize the Database
 
-The application will automatically run migrations when started, but you can manually run them from the REPL:
+The application will automatically run migrations when started, but they can manually run from the REPL:
 
 #+begin_src clojure
 (require '[shorturl.migrations :as migrations])
@@ -126,7 +126,7 @@ The database layer uses next.jdbc with HoneySQL for SQL generation. Key function
 The frontend is a simple React application using Helix that allows users to:
 1. Enter a URL to be shortened
 2. Submit the URL to the API
-3. View and copy the resulting shortened URL
+3. View, copy and follow the resulting shortened URL
 
 ** Development Notes
 

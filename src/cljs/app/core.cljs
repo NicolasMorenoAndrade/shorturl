@@ -16,18 +16,17 @@
         (str (.-origin js/window.location) "/" (:slug state) "/")]
 
     (d/div {:class-name "bg-purple-100 grid place-items-center h-screen"}
-     (if (:slug state)
-       (d/div (d/a {:href redirect-link
-                    :class-name "text-blue-500 hover:text-purple-600"} redirect-link))
-       (d/div
-        (d/input {:value (:url state)
-                  :on-change #(set-state assoc :url (.. % -target -value))
-                  :class-name "form-control border border-solid border-gray-600"
-                  :placeholder "Enter URL"})
-        (d/button {:on-click #(handle-shorten-url)
-                   :class-name "border-1 rounded px-4 uppercase"}
-          "Shorten URL"))))))
-
+           (if (:slug state)
+             (d/div (d/a {:href redirect-link
+                          :class-name "text-blue-500 hover:text-purple-600"} redirect-link))
+             (d/div
+              (d/input {:value (:url state)
+                        :on-change #(set-state assoc :url (.. % -target -value))
+                        :class-name "form-control border border-solid border-gray-600"
+                        :placeholder "Enter URL"})
+              (d/button {:on-click #(handle-shorten-url)
+                         :class-name "border-1 rounded px-4 uppercase"}
+                        "Shorten URL"))))))
 
 (defn ^:export init []
   (let [root (rdom/createRoot (js/document.getElementById "app"))]

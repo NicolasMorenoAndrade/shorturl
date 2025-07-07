@@ -22,7 +22,15 @@
   {:extra-paths ["dev"]
    :extra-deps {org.clojure/tools.namespace {:mvn/version "1.5.0"}}}
 
+  :format-fix
+  {:extra-deps {dev.weavejester/cljfmt {:mvn/version "0.13.1"}}
+   :main-opts ["-m" "cljfmt.main" "fix"]}
+
+  :format-check
+  {:extra-deps {dev.weavejester/cljfmt {:mvn/version "0.13.1"}}
+   :main-opts ["-m" "cljfmt.main" "check"]}
+
   :test
   {:extra-paths ["test"]
-   :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}}
-}
+   :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+}}
