@@ -113,5 +113,5 @@
 
   (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
 
-  (remove-by-slug! "shorturlFE")
+  (remove-by-slug! "datomic")
   (remove-by-url! "https://github.com/seancorfield/honeysql"))

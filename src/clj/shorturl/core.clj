@@ -28,12 +28,18 @@
    Returns a 400 error if no URL is provided or 500 on database errors."
   [req]
   (if-let [url (get-in req [:body-params :url])]
-    (try
-      (let [slug (generate-slug)]
+    (if-let [slug (get-in req [:body-params :slug])]
+      (try
         (db/insert-url-redirection! url slug)
-        (r/response {:slug slug :url url}))
-      (catch Exception e
-        (r/status (r/response {:error (.getMessage e)}) 500)))
+        (r/response {:slug slug :url url})
+        (catch Exception e
+          (r/status (r/response {:error (.getMessage e)}) 500)))
+      (try
+        (let [slug (generate-slug)]
+          (db/insert-url-redirection! url slug)
+          (r/response {:slug slug :url url}))
+        (catch Exception e
+          (r/status (r/response {:error (.getMessage e)}) 500))))
     (r/status (r/response {:error "URL is required"}) 400)))
 
 (defn serve-index
@@ -103,6 +109,7 @@
 
    Stops the server if it's running, then starts it again
    on the given port.
+If no port is passed, restarts using port 3001
 
    Parameters:
    - port: The port number to listen on
@@ -113,7 +120,7 @@
    (restart-server! 3001))
 
   ([port]
-    (stop-server!)
+   (stop-server!)
    (start-server! port)))
 
 (defn -main
@@ -139,4 +146,5 @@
   (stop-server!)
   (restart-server!)
 
-  (serve-index))
+  (serve-index)
+  (create-redirect {:body-params {:url "https://www.youtube.com/watch?v=0mrguRPgCzI&t=1936s" :slug "manualslug"}}))

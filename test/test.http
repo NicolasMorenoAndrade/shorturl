@@ -5,7 +5,8 @@ POST http://localhost:3001/api/redirect/
 Content-Type: application/json
 
 {
-     "url": "https://www.youtube.com/watch?v=0mrguRPgCzI&t=1936s"
+     "url": "https://docs.datomic.com/datomic-overview.html",
+     "slug": "datomiz"
 }
 
 
