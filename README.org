@@ -1,5 +1,4 @@
 
-
 * URL shortener
 
 A full-stack URL shortening application built with Clojure, ClojureScript, and PostgreSQL.
@@ -9,8 +8,16 @@ A full-stack URL shortening application built with Clojure, ClojureScript, and P
 This application allows users to create shortened URLs through a simple web interface. The system consists of:
 
 - *Backend*: Clojure service using Ring, Reitit, and Jetty
-- *Frontend*: ClojureScript UI built with Helix (React wrapper)
+- *Frontend*: ClojureScript UI built with Helix (React)
 - *Database*: PostgreSQL for storing URL mappings
+
+** Features
+
+- Generate shortened URLs with automatically created slugs
+- Create custom shortened URLs with user-defined slugs
+- Simple, responsive web interface
+- Persistent storage of all URL mappings
+- RESTful API for integration with other services
 
 ** Setup and Installation
 
@@ -36,7 +43,7 @@ SSLMODE=require_or_prefer
 
 *** Initialize the Database
 
-The application will automatically run migrations when started, but you can manually run them from the REPL:
+The application will automatically run migrations when started, but they can manually run from the REPL:
 
 #+begin_src clojure
 (require '[shorturl.migrations :as migrations])
@@ -76,6 +83,46 @@ npx shadow-cljs watch app
 #+end_src
 
 This will start the frontend server on port 5003, which proxies API requests to the backend on port 3001.
+
+** Usage
+
+*** Creating Shortened URLs
+
+1. Enter the URL you want to shorten in the "Enter URL" field
+2. Optionally, enter a custom slug in the "Enter slug" field
+   - If left empty, a random slug will be generated automatically
+   - If provided, the system will use your custom text as the slug
+3. Click "Shorten URL" to create your shortened link
+4. The resulting shortened URL will be displayed and can be clicked to navigate to the original URL
+
+*** API Usage
+
+To create a shortened URL programmatically:
+
+#+begin_src
+POST /api/redirect/
+Content-Type: application/json
+
+{
+    "url": "https://example.com/long/url/path",
+    "slug": "custom"  // Optional - omit for auto-generated slug
+}
+#+end_src
+
+Response:
+#+begin_src json
+{
+    "slug": "custom",
+    "url": "https://example.com/long/url/path"
+}
+#+end_src
+
+To use a shortened URL, simply access:
+#+begin_src
+GET /{slug}/
+#+end_src
+
+This will redirect to the original URL.
 
 ** Architecture
 
@@ -126,11 +173,28 @@ The database layer uses next.jdbc with HoneySQL for SQL generation. Key function
 
 The frontend is a simple React application using Helix that allows users to:
 1. Enter a URL to be shortened
-2. Submit the URL to the API
-3. View and copy the resulting shortened URL
+2. Optionally provide a custom slug
+3. Submit the URL to the API
+4. View, copy and follow the resulting shortened URL
 
 ** Development Notes
 
 During development, the backend and frontend can be run simultaneously:
 1. Start the backend on port 3001
 2. Start shadow-cljs on port 5003 (configured to proxy API requests to port 3001)
+
+** Credits
+This is based on this [[https://www.youtube.com/watch?v=0mrguRPgCzI&t=485s][super cool youtube tutorial]] by Daniel Amber.
+#+end_src
+
+Key changes I've made:
+
+1. Added a dedicated "Features" section that explicitly mentions custom slugs
+2. Expanded the "Usage" section with detailed instructions for creating shortened URLs, including how to use the custom slug feature
+3. Added API usage examples showing how to create URLs with or without custom slugs
+4. Updated the frontend description to mention the custom slug functionality
+5. Improved formatting and organization throughout the document
+
+Would you like me to make any additional changes or emphasize any other aspects of the custom slug feature?
+
+***

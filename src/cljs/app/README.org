@@ -1,0 +1,44 @@
+* Shorturl Frontend
+This is the frontend of this app.
+
+** Development Notes
+#+begin_src clojurescript
+(let [[state set-state] (hooks/use-state {:slug nil :url ""})])
+#+end_src
+
+1. *React Hook Basics*
+- =use-state= is a fundamental [[https://react.dev/reference/react/hooks][React Hook]] that lets you add state to functional components
+- Helix is a ClojureScript wrapper around React. eg. =hooks/use-state= wraps React's =useState=
+- The hook returns a vector containing two elements:
+  1. The current state value
+  2. A function to update that state
+
+2. *Initial State*
+#+begin_src clojurescript
+{:slug nil :url ""}
+#+end_src
+- This map is the initial state
+- =:slug= starts as =nil= (no shortened URL yet)
+- =:url= starts as an empty string (empty input field)
+
+3. *Destructuring*
+#+begin_src clojurescript
+[state set-state]
+#+end_src
+- Uses Clojure's vector destructuring to assign names to the two returned values
+- =state= will contain the current state map
+- =set-state= is the function used to update the state
+
+4. *Usage Example in shorturl core.cljs*:
+
+#+begin_src clojurescript
+;; Reading state
+(:url state)  ;; gets the current URL value
+
+;; Updating state when input changes
+(set-state assoc :url (.. % -target -value))
+
+;; Updating state after API call
+(-> (api/create-short-url (:url state))
+    (p/then #(set-state assoc :slug (:slug %))))
+#+end_src
