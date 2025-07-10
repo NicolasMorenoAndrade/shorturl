@@ -7,14 +7,21 @@
             [app.api :as api]))
 
 (defnc app []
-  (let [[state set-state] (hooks/use-state {:slug nil :url "" :custom-slug ""})
+  (let [[state set-state] (hooks/use-state {:slug nil :url "" :custom-slug "" :loading? false})
         handle-shorten-url
         (fn []
+          (set-state assoc :loading? true)
+          ;; (.log js/console (str "state " (:loading? state)))
           (-> (api/fetch-slug (:url state) (:custom-slug state))
-              (p/then #(set-state assoc :slug (:slug %)))))
+              (p/then #(set-state assoc :slug (:slug %)))
+              (p/finally #(set-state assoc :loading? false))))
         redirect-link
         (str (.-origin js/window.location) "/" (:slug state) "/")]
 
+    (hooks/use-effect
+     ;; an example of the usage of use-effect. Will run on every change of (:loading state),
+     [(:loading? state)]
+     (.log js/console (str "loading state changed to: " (:loading? state))))
     (d/div {:class-name "bg-purple-100 grid place-items-center h-screen p-4"}
            (d/div {:class-name "bg-white rounded-lg shadow-md p-8 w-full max-w-md"}
                   (d/h1 {:class-name "text-2xl font-bold text-purple-800 mb-6 text-center"}
@@ -39,6 +46,7 @@
                                       "URL to Shorten")
                              (d/input {:id "url-input"
                                        :value (:url state)
+                                       :disabled (:loading? state)
                                        :on-change #(set-state assoc :url (.. % -target -value))
                                        :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                        :placeholder "https://example.com/long/path"}))
@@ -49,13 +57,18 @@
                                       "Custom Slug (Optional)")
                              (d/input {:id "slug-input"
                                        :value (:custom-slug state)
+                                       :disabled (:loading? state)
                                        :on-change #(set-state assoc :custom-slug (.. % -target -value))
                                        :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                        :placeholder "e.g., my-link"}))
 
                             (d/button {:type "submit"
-                                       :class-name "w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2"}
-                                      "Shorten URL")))))))
+                                       :disabled (:loading? state)
+                                       :class-name (str "w-full bg-purple-600 "
+                                                        (if (:loading? state) "opacity-70 cursor-not-allowed" "hover:bg-purple-700 cursor-pointer") " text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2")}
+                                      (if (:loading? state)
+                                        (d/div {:class-name "flex items-center justify-center"} (d/span {:class-name "animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"}) "Shortening...")
+                                        "Shorten URL"))))))))
 
 (defn ^:export init
   "Initializes the URL shortener application.
