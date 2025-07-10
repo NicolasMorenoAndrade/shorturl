@@ -15,22 +15,47 @@
         redirect-link
         (str (.-origin js/window.location) "/" (:slug state) "/")]
 
-    (d/div {:class-name "bg-purple-100 grid place-items-center h-screen"}
-           (if (:slug state)
-             (d/div (d/a {:href redirect-link
-                          :class-name "text-blue-500 hover:text-purple-600"} redirect-link))
-             (d/div
-              (d/input {:value (:url state)
-                        :on-change #(set-state assoc :url (.. % -target -value))
-                        :class-name "form-control border border-solid border-gray-600"
-                        :placeholder "Enter URL"})
-              (d/input {:value (:custom-slug state)
-                        :on-change #(set-state assoc :custom-slug (.. % -target -value))
-                        :class-name "form-control border border-solid border-gray-600"
-                        :placeholder "Enter slug"})
-              (d/button {:on-click #(handle-shorten-url)
-                         :class-name "border-1 rounded px-4 uppercase"}
-                        "Shorten URL"))))))
+    (d/div {:class-name "bg-purple-100 grid place-items-center h-screen p-4"}
+           (d/div {:class-name "bg-white rounded-lg shadow-md p-8 w-full max-w-md"}
+                  (d/h1 {:class-name "text-2xl font-bold text-purple-800 mb-6 text-center"}
+                        "URL Shortener")
+
+                  (if (:slug state)
+                    (d/div {:class-name "text-center"}
+                           (d/p {:class-name "mb-3 text-gray-600"} "Your shortened URL:")
+                           (d/a {:href redirect-link
+                                 :class-name "text-purple-500 hover:text-purple-600 font-medium text-lg break-all"}
+                                redirect-link)
+                           (d/button {:class-name "mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded transition-colors duration-200"
+                                      :on-click #(set-state {:slug nil :url "" :custom-slug ""})}
+                                     "Create Another Link"))
+
+                    (d/form {:on-submit (fn [e] (.preventDefault e) (handle-shorten-url))
+                             :class-name "space-y-4"}
+
+                            (d/div
+                             (d/label {:for "url-input"
+                                       :class-name "block text-sm font-medium text-gray-700 mb-1"}
+                                      "URL to Shorten")
+                             (d/input {:id "url-input"
+                                       :value (:url state)
+                                       :on-change #(set-state assoc :url (.. % -target -value))
+                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                       :placeholder "https://example.com/long/path"}))
+
+                            (d/div
+                             (d/label {:for "slug-input"
+                                       :class-name "block text-sm font-medium text-gray-700 mb-1"}
+                                      "Custom Slug (Optional)")
+                             (d/input {:id "slug-input"
+                                       :value (:custom-slug state)
+                                       :on-change #(set-state assoc :custom-slug (.. % -target -value))
+                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                       :placeholder "e.g., my-link"}))
+
+                            (d/button {:type "submit"
+                                       :class-name "w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2"}
+                                      "Shorten URL")))))))
 
 (defn ^:export init
   "Initializes the URL shortener application.
