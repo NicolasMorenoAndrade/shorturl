@@ -11,6 +11,10 @@
         funcool/promesa {:mvn/version "11.0.678"}}
  :aliases
  {
+  :build
+  {:deps {io.github.clojure/tools.build {:git/tag "v0.10.9" :git/sha "e405aac"}
+          org.clojure/clojure {:mvn/version "1.12.0"}}
+          :ns-default build}
   :lint
   {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}
    :main-opts ["-m" "clj-kondo.main" "--lint" "src" "test"]}
