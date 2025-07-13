@@ -10,8 +10,10 @@
 node_modules/
 package-lock.json
 
-# Build output
+# Build output & assets
 resources/public/assets/js/
+resources/public/assets/*.css
+resources/public/assets/*.png
 
 # Environment variables
 env.edn
