@@ -46,6 +46,6 @@
   (create-shortened-urls-table!))
 
 (comment
-  (run-migrations!)
+  ;; (drop-shortened-urls-table!)
   ;; TODO need better message when dropping table
-  (drop-shortened-urls-table!))
+  (run-migrations!))
