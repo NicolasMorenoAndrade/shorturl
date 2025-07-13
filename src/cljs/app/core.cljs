@@ -22,18 +22,18 @@
      ;; an example of the usage of use-effect. Will run on every change of (:loading state),
      [(:loading? state)]
      (.log js/console (str "loading state changed to: " (:loading? state))))
-    (d/div {:class-name "bg-red-100 grid place-items-center h-screen p-4"}
+    (d/div {:class-name "bg-lime-100 grid place-items-center h-screen p-4"}
            (d/div {:class-name "bg-white rounded-lg shadow-md p-8 w-full max-w-md"}
-                  (d/h1 {:class-name "text-2xl font-bold text-red-800 mb-6 text-center"}
+                  (d/h1 {:class-name "text-2xl font-bold text-lime-800 mb-6 text-center"}
                         "URL Shortener")
 
                   (if (:slug state)
                     (d/div {:class-name "text-center"}
                            (d/p {:class-name "mb-3 text-gray-600"} "Your shortened URL:")
                            (d/a {:href redirect-link
-                                 :class-name "text-red-500 hover:text-red-600 font-medium text-lg break-all"}
+                                 :class-name "text-lime-500 hover:text-lime-600 font-medium text-lg break-all"}
                                 redirect-link)
-                           (d/button {:class-name "mt-6 w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors duration-200"
+                           (d/button {:class-name "mt-6 w-full bg-lime-600 hover:bg-lime-700 text-white py-2 px-4 rounded transition-colors duration-200"
                                       :on-click #(set-state {:slug nil :url "" :custom-slug ""})}
                                      "Create Another Link"))
 
@@ -48,7 +48,7 @@
                                        :value (:url state)
                                        :disabled (:loading? state)
                                        :on-change #(set-state assoc :url (.. % -target -value))
-                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
                                        :placeholder "https://example.com/long/path"}))
 
                             (d/div
@@ -59,13 +59,13 @@
                                        :value (:custom-slug state)
                                        :disabled (:loading? state)
                                        :on-change #(set-state assoc :custom-slug (.. % -target -value))
-                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                       :class-name "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
                                        :placeholder "e.g., my-link"}))
 
                             (d/button {:type "submit"
                                        :disabled (:loading? state)
-                                       :class-name (str "w-full bg-red-600 "
-                                                        (if (:loading? state) "opacity-70 cursor-not-allowed" "hover:bg-red-700 cursor-pointer") " text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2")}
+                                       :class-name (str "w-full bg-lime-600 "
+                                                        (if (:loading? state) "opacity-70 cursor-not-allowed" "hover:bg-lime-700 cursor-pointer") " text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2")}
                                       (if (:loading? state)
                                         (d/div {:class-name "flex items-center justify-center"} (d/span {:class-name "animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"}) "Shortening...")
                                         "Shorten URL"))))))))
