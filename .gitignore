@@ -13,7 +13,7 @@ package-lock.json
 # Build output & assets
 target/*
 resources/public/assets/js/*
-resources/public/assets/css/*
+resources/public/assets/css/output.css
 resources/public/assets/*.png
 
 # Environment variables
