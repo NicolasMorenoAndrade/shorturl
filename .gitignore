@@ -17,4 +17,5 @@ resources/public/assets/css/*
 resources/public/assets/*.png
 
 # Environment variables
+.env
 env.edn
