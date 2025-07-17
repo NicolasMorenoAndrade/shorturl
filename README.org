@@ -50,7 +50,7 @@ The application will automatically run migrations when started, but they can man
 (migrations/run-migrations!)
 #+end_src
 
-** Running the Application
+** Running the Application in development
 
 *** Backend Server
 
@@ -83,6 +83,41 @@ npx shadow-cljs watch app
 #+end_src
 
 This will start the frontend server on port 5003, which proxies API requests to the backend on port 3001.
+
+** Pre-deployment Testing Workflow
+
+When finalizing a new feature we use the following workflow to ensure everything works correctly in a production-like environment:
+
+#+begin_src bash
+# 1. Process and minify CSS with Tailwind
+npx @tailwindcss/cli -i ./resources/public/assets/css/input.css -o ./resources/public/assets/css/output.css --minify
+
+# 2. Build optimized ClojureScript frontend
+npx shadow-cljs release app
+
+# 3. Create standalone uberjar for the backend
+clj -T:build uber
+
+# 4. Build and run Docker container for testing
+sudo docker-compose up --build
+#+end_src
+
+Note the =--minify= flag that performs several optimizations on the output CSS (removes unused class-names, spaces etc).
+
+*** Docker Build Process
+
+The Docker build process performs several important steps:
+1. Uses the Clojure tools-deps base image
+2. Installs Node.js and npm for frontend processing
+3. Copies application code and dependencies
+4. Processes CSS with Tailwind
+5. Builds optimized ClojureScript frontend
+6. Creates a standalone uberjar
+7. Runs the application on port 3001 (mapped to port 8080)
+
+This containerized testing approach ensures that our custom slug feature works correctly in an isolated environment that closely resembles production, catching any issues with environment variables, database connections, or build processes before deployment.
+
+To test the application after building, navigate to http://localhost:8080 in your browser or whichever port is in the [[./docker-compose.yaml][docker-compose.yaml]]
 
 ** Usage
 
