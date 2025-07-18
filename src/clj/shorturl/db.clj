@@ -78,8 +78,8 @@
 
   (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
 
-  (jdbc/execute! ds (sql/format {:select [:*]
-                                 :from [:shortened_urls]}))
+  (count (jdbc/execute! ds (sql/format {:select [:*]
+                                 :from [:shortened_urls]})))
 
   (jdbc/execute! ds
                  (->
@@ -108,7 +108,7 @@
 
   (execute-query (-> (h/select :*)
                      (h/from :shortened_urls)
-                     (h/where [:= :slug "backend"])
+                     (h/where [:= :slug "palmita"])
                      (sql/format)))
 
   (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")

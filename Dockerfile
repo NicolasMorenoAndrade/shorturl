@@ -2,6 +2,7 @@ FROM clojure:tools-deps
 
 RUN apt-get update && apt-get install -y nodejs npm curl
 
+# ?
 WORKDIR /usr/src/app
 
 # Copy dependency files first (for better layer caching)

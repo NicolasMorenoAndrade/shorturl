@@ -7,6 +7,7 @@
             [app.api :as api]
             [app.styles :refer [styles]]))
 
+
 (defnc app []
   (let [[state set-state] (hooks/use-state {:slug nil :url "" :custom-slug "" :loading? false})
         handle-shorten-url
