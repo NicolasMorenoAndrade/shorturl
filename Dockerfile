@@ -3,8 +3,15 @@ FROM clojure:tools-deps
 # it is an app; we need npm and a js runtime
 RUN apt-get update && apt-get install -y nodejs npm curl
 
-# ?
+# Install Git LFS
+RUN apt-get install git-lfs
+
+# it is what it is
 WORKDIR /usr/src/app
+
+# Clone with LFS objects instead of copying
+RUN git clone https://github.com/NicolasMorenoAndrade/shorturl.git .
+RUN git lfs pull
 
 # Copy dependency files first (for better layer caching)
 COPY deps.edn shadow-cljs.edn package.json package-lock.json* ./
