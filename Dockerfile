@@ -1,25 +1,24 @@
 FROM clojure:tools-deps
 
-# Install dependencies
-RUN apt-get update && apt-get install -y nodejs npm curl git-lfs
+# it is an app; we need npm and a js runtime
+RUN apt-get update && apt-get install -y nodejs npm curl
 
-# Initialize Git LFS
-RUN git lfs install
+# Install Git LFS
+RUN apt-get install -y git-lfs
 
-# Set up working directory
+# it is what it is
 WORKDIR /usr/src/app
 
-# First, do a shallow clone with --no-checkout to get just the repo structure
-RUN git clone --no-checkout https://github.com/NicolasMorenoAndrade/shorturl.git .
+# Copy dependency files first (for better layer caching)
+COPY deps.edn shadow-cljs.edn package.json package-lock.json* ./
 
-# Checkout only the dependency files first
-RUN git checkout HEAD deps.edn shadow-cljs.edn package.json package-lock.json
-
-# Install dependencies (this layer can be cached)
+# Install npm dependencies
 RUN npm install
 
-# Now checkout everything else and pull LFS objects
-RUN git checkout HEAD
+# Copy the entire repo: source code and resources
+COPY . .
+
+# Clone with LFS objects instead of copying
 RUN git lfs pull
 
 # Process and optimize CSS with Tailwind
@@ -42,4 +41,3 @@ HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3001/ || ex
 
 # Command to run the application
 CMD ["java", "-jar", "target/app-standalone.jar"]
-arget/app-standalone.jar"]
