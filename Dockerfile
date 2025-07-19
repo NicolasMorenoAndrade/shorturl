@@ -1,5 +1,6 @@
 FROM clojure:tools-deps
 
+# it is an app; we need npm and a js runtime
 RUN apt-get update && apt-get install -y nodejs npm curl
 
 # ?
@@ -11,10 +12,10 @@ COPY deps.edn shadow-cljs.edn package.json package-lock.json* ./
 # Install npm dependencies
 RUN npm install
 
-# Copy source code and resources
+# Copy the entire repo: source code and resources
 COPY . .
 
-# Process CSS with Tailwind
+# Process and optimize CSS with Tailwind
 RUN npx @tailwindcss/cli -i ./resources/public/assets/css/input.css -o ./resources/public/assets/css/output.css --minify
 
 # Build frontend

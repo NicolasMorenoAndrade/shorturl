@@ -7,7 +7,6 @@
             [app.api :as api]
             [app.styles :refer [styles]]))
 
-
 (defnc app []
   (let [[state set-state] (hooks/use-state {:slug nil :url "" :custom-slug "" :loading? false})
         handle-shorten-url
@@ -21,7 +20,7 @@
 
     (hooks/use-effect
      [(:loading? state)]
-     (.log js/console (str "loading state changed to: " (:loading? state))))
+     (.log js/console (str ":loading? state (value) changed to: " (:loading? state))))
 
     (d/div {:class-name (get styles :container)}
            (d/div {:class-name (get styles :card)}
@@ -41,7 +40,10 @@
                                      "Create Another Link"))
 
                     ;; Form section
-                    (d/form {:on-submit (fn [e] (.preventDefault e) (handle-shorten-url))
+                    (d/form {:on-submit (fn [e]
+                                          (.preventDefault e) (if (empty? (:url state))
+                                                                (js/alert "URL cannot be empty")
+                                                                (handle-shorten-url)))
                              :class-name (get-in styles [:form :container])}
 
                             (d/div
@@ -81,7 +83,7 @@
 (defn ^:export init
   "Initializes the URL shortener application.
 
-   Creates a React root in the 'app' DOM element and renders
+   Creates ($) a React root in the 'app' DOM element and renders
    the main application component. This function is exported
    and called from JavaScript when the page loads.
 

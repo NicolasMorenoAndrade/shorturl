@@ -79,7 +79,7 @@
   (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
 
   (count (jdbc/execute! ds (sql/format {:select [:*]
-                                 :from [:shortened_urls]})))
+                                        :from [:shortened_urls]})))
 
   (jdbc/execute! ds
                  (->
