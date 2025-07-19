@@ -1,26 +1,26 @@
 FROM clojure:tools-deps
 
-# it is an app; we need npm and a js runtime
-RUN apt-get update && apt-get install -y nodejs npm curl
+# Install dependencies
+RUN apt-get update && apt-get install -y nodejs npm curl git-lfs
 
-# Install Git LFS
-RUN apt-get install git-lfs
+# Initialize Git LFS
+RUN git lfs install
 
-# it is what it is
+# Set up working directory
 WORKDIR /usr/src/app
 
-# Clone with LFS objects instead of copying
-RUN git clone https://github.com/NicolasMorenoAndrade/shorturl.git .
-RUN git lfs pull
+# First, do a shallow clone with --no-checkout to get just the repo structure
+RUN git clone --no-checkout https://github.com/NicolasMorenoAndrade/shorturl.git .
 
-# Copy dependency files first (for better layer caching)
-COPY deps.edn shadow-cljs.edn package.json package-lock.json* ./
+# Checkout only the dependency files first
+RUN git checkout HEAD deps.edn shadow-cljs.edn package.json package-lock.json
 
-# Install npm dependencies
+# Install dependencies (this layer can be cached)
 RUN npm install
 
-# Copy the entire repo: source code and resources
-COPY . .
+# Now checkout everything else and pull LFS objects
+RUN git checkout HEAD
+RUN git lfs pull
 
 # Process and optimize CSS with Tailwind
 RUN npx @tailwindcss/cli -i ./resources/public/assets/css/input.css -o ./resources/public/assets/css/output.css --minify
@@ -42,3 +42,4 @@ HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3001/ || ex
 
 # Command to run the application
 CMD ["java", "-jar", "target/app-standalone.jar"]
+arget/app-standalone.jar"]
