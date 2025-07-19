@@ -25,22 +25,31 @@
   "Creates a new shortened URL.
    Takes a URL from the request body, generates a unique slug,
    stores the mapping in the database, and returns the slug.
-   Returns a 400 error if no URL is provided or 500 on database errors."
+   Returns a 400 error if no URL is provided or if it's empty."
   [req]
-  (if-let [url (get-in req [:body-params :url])]
-    (if-let [slug (get-in req [:body-params :slug])]
+  (let [url (get-in req [:body-params :url])
+        slug (get-in req [:body-params :slug])]
+    (cond
+      (nil? url)
+      (r/status (r/response {:error "URL is required"}) 400)
+
+      (empty? url)
+      (r/status (r/response {:error "URL cannot be empty"}) 400)
+
+      slug
       (try
         (db/insert-url-redirection! url slug)
         (r/response {:slug slug :url url})
         (catch Exception e
           (r/status (r/response {:error (.getMessage e)}) 500)))
+
+      :else
       (try
         (let [slug (generate-slug)]
           (db/insert-url-redirection! url slug)
           (r/response {:slug slug :url url}))
         (catch Exception e
-          (r/status (r/response {:error (.getMessage e)}) 500))))
-    (r/status (r/response {:error "URL is required"}) 400)))
+          (r/status (r/response {:error (.getMessage e)}) 500))))))
 
 (defn serve-index
   "Serves the main application HTML page from resources."

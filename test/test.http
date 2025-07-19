@@ -1,16 +1,9 @@
-# GET http://localhost:3001/backend/
+GET http://localhost:3001/
 
-
-POST http://localhost:3001/api/redirect/
-Content-Type: application/json
-
-{
-     "url": "https://docs.datomic.com/datomic-overview.html",
-     "slug": "datomiz"
-}
-
-
+# POST http://localhost:3001/api/redirect/
 # Content-Type: application/json
-# Authorization: Bearer YOUR_TOKEN
 
-# POST https://api.example.com/users
+# {
+#      "url": "",
+#      "slug": "datomizzz"
+# }
