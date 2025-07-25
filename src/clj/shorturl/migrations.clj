@@ -39,12 +39,10 @@
     (sql/format
      {:drop-table [:if-exists :shortened_urls]}))))
 
-
 ;; [[:id :serial [:primary-key]]
 ;;       [:original_url :text [:not nil]]
 ;;       [:slug [:varchar 10] [:not nil] [:unique]]
 ;;  [:created_at :timestamp [:default :current_timestamp]]]
-
 
 (defn create-users-table!
   "Creates the users table if it doesn't exist"
@@ -64,11 +62,8 @@
   []
   (create-shortened-urls-table!))
 
-
-
 (comment
   ;; (drop-shortened-urls-table!)
   ;; TODO need better message when dropping table
   (run-migrations!)
-  (create-users-table!)
-  )
+  (create-users-table!))
