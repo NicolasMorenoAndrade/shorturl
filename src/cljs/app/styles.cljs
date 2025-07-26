@@ -2,9 +2,15 @@
 
 ;; Define styles map outside component for reusability
 (def styles
-  {:container "bg-lime-100 grid place-items-center h-screen p-4"
+  {:container "bg-lime-100 grid place-items-center h-screen p-2"
    :card "bg-white rounded-lg shadow-md p-8 w-full max-w-md"
    :title "text-2xl font-bold text-lime-800 mb-6 text-center"
+
+   :auth
+   {:container "mb-2 p-4 border-b border-gray-100"
+    :welcome "text-lg font-medium text-lime-700"
+    :email "mb-2 text-sm text-gray-600 mt-1"
+    :button "mt-6 w-full bg-lime-600 hover:bg-lime-700 text-white py-2 px-4 rounded transition-colors duration-200 font-medium"}
 
    :result-section
    {:container "text-center"

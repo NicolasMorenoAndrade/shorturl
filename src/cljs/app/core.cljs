@@ -5,10 +5,12 @@
             ["react-dom/client" :as rdom]
             [promesa.core :as p]
             [app.api :as api]
-            [app.styles :refer [styles]]))
+            [app.styles :refer [styles]]
+            [app.firebase :as firebase]))
 
 (defnc app []
-  (let [[state set-state] (hooks/use-state {:slug nil :url "" :custom-slug "" :loading? false})
+  (let [[state set-state] (hooks/use-state {:user nil :authenticated? false
+                                            :slug nil :url "" :custom-slug "" :loading? false})
         handle-shorten-url
         (fn []
           (set-state assoc :loading? true)
@@ -18,9 +20,14 @@
         redirect-link
         (str (.-origin js/window.location) "/" (:slug state) "/")]
 
+    ;; Set up auth listener on component mount
+    (hooks/use-effect
+     []  ;; Empty dependency array = run once on mount
+     (firebase/store-user set-state))
+
     (hooks/use-effect
      [(:loading? state)]
-     (.log js/console (str ":loading? state (value) changed to: " (:loading? state))))
+     (.log js/console (str ":loading? state (value): " (:loading? state))))
 
     (d/div {:class-name (get styles :container)}
            (d/div {:class-name (get styles :card)}
@@ -78,7 +85,35 @@
                                         (d/div {:class-name (get-in styles [:loading :container])}
                                                (d/span {:class-name (get-in styles [:loading :spinner])})
                                                "Shortening...")
-                                        "Shorten URL"))))))))
+                                        "Shorten URL"))))
+                             (d/div {:class-name (get-in styles [:auth :container])}
+                  (if (:authenticated? state)
+                     ;; User is logged in
+                    (d/div
+                     (d/p {:class-name (get-in styles [:auth :welcome])}
+                          (str "Welcome, " (get-in state [:user :display-name])))
+                     (d/p {:class-name (get-in styles [:auth :email])}
+                          (str "Email: " (get-in state [:user :email])))
+
+                     (d/button {:class-name (get-in styles [:auth :button])
+                                :on-click #(-> (firebase/sign-out)
+                                               (p/then (fn [_]
+                                                         (.log js/console "Signed out successfully")))
+                                               (p/catch (fn [err]
+                                                          (.error js/console "Error signing out:" err))))}
+                               "Sign Out"))
+
+                     ;; User is not logged in
+                    (d/button {:class-name (get-in styles [:auth :button])
+                               :on-click #(firebase/google-sign-in)}
+                              "Sign in with Google")))
+                  )
+
+;; Authentication UI - placed at the bottom of the card/
+
+           )
+
+    ))
 
 (defn ^:export init
   "Initializes the URL shortener application.

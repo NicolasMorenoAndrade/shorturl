@@ -39,6 +39,23 @@
     (sql/format
      {:drop-table [:if-exists :shortened_urls]}))))
 
+;; [[:id :serial [:primary-key]]
+;;       [:original_url :text [:not nil]]
+;;       [:slug [:varchar 10] [:not nil] [:unique]]
+;;  [:created_at :timestamp [:default :current_timestamp]]]
+
+(defn create-users-table!
+  "Creates the users table if it doesn't exist"
+  []
+  (execute-query
+   (sql/format
+    {:create-table [:users :if-not-exists]
+     :with-columns
+     [[:id :serial [:primary-key]]
+      [:email :text [:not nil] [:unique]]
+      [:password_hash :text [:not nil]]
+      [:created_at :timestamp [:default :current-timestamp]]]})))
+
 (defn run-migrations!
   "Runs all migrations to set up the database schema.
    This should be called during application initialization."
@@ -48,4 +65,5 @@
 (comment
   ;; (drop-shortened-urls-table!)
   ;; TODO need better message when dropping table
-  (run-migrations!))
+  (run-migrations!)
+  (create-users-table!))
