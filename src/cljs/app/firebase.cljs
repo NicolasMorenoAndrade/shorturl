@@ -1,8 +1,7 @@
 (ns app.firebase
   (:require
    ["firebase/app" :as firebase]
-   ["firebase/auth" :refer [GoogleAuthProvider getAuth signInWithPopup onAuthStateChanged signOut]]
-   [promesa.core :as p]))
+   ["firebase/auth" :refer [GoogleAuthProvider getAuth signInWithPopup onAuthStateChanged signOut]]))
 
 (defn init []
   ;; initialize firebase app. runs once.
@@ -24,6 +23,8 @@
 
 (defn sign-out []
   (signOut (getAuth)))
+
+
 
 (defn set-user! [set-state]
   "Updates application state with Firebase user information.
