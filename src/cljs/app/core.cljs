@@ -8,9 +8,16 @@
             [app.styles :refer [styles]]
             [app.firebase :as firebase]))
 
+(defn sign-out-reset-auth-dropdown! [set-state]
+  (-> (firebase/sign-out)
+      (p/then (fn [_] (.log js/console "Signed out successfully")
+                (set-state assoc :dropdown-open? false)))
+      (p/catch (fn [err] (.error js/console "Error signing out:" err)))))
+
 (defnc app []
-  (let [[state set-state] (hooks/use-state {:user nil :authenticated? false
-                                            :slug nil :url "" :custom-slug "" :loading? false})
+  (let [[state set-state] (hooks/use-state {:user {:display-name "" :email ""} :authenticated? false
+                                            :slug nil :url "" :custom-slug ""
+                                            :loading? false :dropdown-open? false})
         handle-shorten-url
         (fn []
           (set-state assoc :loading? true)
@@ -23,7 +30,7 @@
     ;; Set up auth listener on component mount
     (hooks/use-effect
      []  ;; Empty dependency array = run once on mount
-     (firebase/store-user set-state))
+     (firebase/set-user! set-state))
 
     (hooks/use-effect
      [(:loading? state)]
@@ -31,6 +38,37 @@
 
     (d/div {:class-name (get styles :container)}
            (d/div {:class-name (get styles :card)}
+                  (d/div {:class-name "relative"}
+                         (d/div {:class-name (get-in styles [:auth :container])}
+                                (d/div
+                                 (d/button {:class-name (get-in styles [:auth :user-icon])
+                                            :on-click #(set-state assoc :dropdown-open?
+                                                                  (not (:dropdown-open? state)))}
+                                           (-> (get-in state [:user :display-name] "User")
+                                               first
+                                               str)))
+
+                                (when (:dropdown-open? state)
+                                  (d/div {:class-name (get-in styles [:auth :dropdown])}
+
+                                         ;; User info
+                                         (d/div {:class-name (get-in styles [:auth :user-info])}
+                                                (if (:authenticated? state)
+                                                  (d/div (d/p {:class-name (get-in styles [:auth :welcome])}
+                                                           (str (get-in state [:user :display-name])))
+                                                    (d/p {:class-name (get-in styles [:auth :email])}
+                                                      (str (get-in state [:user :email]))))
+                                                  (d/p "Not signed-in")))
+                                         (d/div
+                                          (if (not (:authenticated? state))
+                                           ;; Sign in button for logged-out user
+                                            (d/button {:class-name (get-in styles [:auth :dropdown-item])
+                                                       :on-click #(firebase/google-sign-in)}
+                                                      "Sign in")
+                                            (d/button {:class-name (get-in styles [:auth :dropdown-item])
+                                                       :on-click #(sign-out-reset-auth-dropdown! set-state)}
+                                                      "Sign out")))))))
+
                   (d/h1 {:class-name (get styles :title)}
                         "URL Shortener")
 
@@ -86,34 +124,7 @@
                                                (d/span {:class-name (get-in styles [:loading :spinner])})
                                                "Shortening...")
                                         "Shorten URL"))))
-                             (d/div {:class-name (get-in styles [:auth :container])}
-                  (if (:authenticated? state)
-                     ;; User is logged in
-                    (d/div
-                     (d/p {:class-name (get-in styles [:auth :welcome])}
-                          (str "Welcome, " (get-in state [:user :display-name])))
-                     (d/p {:class-name (get-in styles [:auth :email])}
-                          (str "Email: " (get-in state [:user :email])))
-
-                     (d/button {:class-name (get-in styles [:auth :button])
-                                :on-click #(-> (firebase/sign-out)
-                                               (p/then (fn [_]
-                                                         (.log js/console "Signed out successfully")))
-                                               (p/catch (fn [err]
-                                                          (.error js/console "Error signing out:" err))))}
-                               "Sign Out"))
-
-                     ;; User is not logged in
-                    (d/button {:class-name (get-in styles [:auth :button])
-                               :on-click #(firebase/google-sign-in)}
-                              "Sign in with Google")))
-                  )
-
-;; Authentication UI - placed at the bottom of the card/
-
-           )
-
-    ))
+                  (d/div {:class-name (get-in styles [:auth :container])})))))
 
 (defn ^:export init
   "Initializes the URL shortener application.
