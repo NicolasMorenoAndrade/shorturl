@@ -38,7 +38,6 @@
 
     (d/div {:class-name (get styles :container)}
            (d/div {:class-name (get styles :card)}
-
                   (d/div {:class-name "relative"}
                          (d/div {:class-name (get-in styles [:auth :container])}
                                 (d/div
@@ -54,15 +53,12 @@
 
                                          ;; User info
                                          (d/div {:class-name (get-in styles [:auth :user-info])}
-
                                                 (if (:authenticated? state)
-                                                  (d/p {:class-name (get-in styles [:auth :welcome])}
-                                                       (str (get-in state [:user :display-name])))
-                                                  (d/p "Not signed-in"))
-
-                                                ;; (d/p {:class-name (get-in styles [:auth :email])}
-                                                ;;      (get-in state [:user :email])))
-                                                )
+                                                  (d/div (d/p {:class-name (get-in styles [:auth :welcome])}
+                                                           (str (get-in state [:user :display-name])))
+                                                    (d/p {:class-name (get-in styles [:auth :email])}
+                                                      (str (get-in state [:user :email]))))
+                                                  (d/p "Not signed-in")))
                                          (d/div
                                           (if (not (:authenticated? state))
                                            ;; Sign in button for logged-out user
@@ -128,31 +124,8 @@
                                                (d/span {:class-name (get-in styles [:loading :spinner])})
                                                "Shortening...")
                                         "Shorten URL"))))
-                  (d/div {:class-name (get-in styles [:auth :container])}
+                  (d/div {:class-name (get-in styles [:auth :container])})))))
 
-;; (if (:authenticated? state)
-;;                      ;; User is logged in
-;;                     (d/div
-;;                      (d/p {:class-name (get-in styles [:auth :welcome])}
-                          ;; (str "Welcome, " (get-in state [:user :display-name])))
-;;                      (d/p {:class-name (get-in styles [:auth :email])}
-;;                           (str "Email: " (get-in state [:user :email])))
-
-;;                      (d/button {:class-name (get-in styles [:auth :button])
-;;                                 :on-click #(-> (firebase/sign-out)
-;;                                                (p/then (fn [_]
-;;                                                          (.log js/console "Signed out successfully")))
-;;                                                (p/catch (fn [err]
-;;                                                           (.error js/console "Error signing out:" err))))}
-;;                                "Sign Out"))
-
-;;                      ;; User is not logged in
-;;                     (d/button {:class-name (get-in styles [:auth :button])
-;;                                :on-click #(firebase/google-sign-in)}
-;;                               "Sign in with Google"))
-                         ))
-;; Authentication UI - placed at the bottom of the card/
-           )))
 (defn ^:export init
   "Initializes the URL shortener application.
 
