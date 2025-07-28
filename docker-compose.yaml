@@ -1,14 +1,72 @@
+# version: '3'
+
 services:
+  # Your existing app service
   app:
     build: .
-    ports:
-      - 80:3001
-      - 443:3001 # For HTTPS when you set it up
+    expose:
+      - 3001
     environment:
+      - VIRTUAL_HOST=hitoiki.co,www.hitoiki.co
+      - LETSENCRYPT_HOST=hitoiki.co,www.hitoiki.co
+      - VIRTUAL_PORT=3001
       # Database credentials
-      SHORTURL_DB_USER: ${NEON_DB_USER}
-      SHORTURL_DB_PASSWORD: ${NEON_DB_PASSWORD}
-      # Explicitly set SSL parameters for Neon DB
-      SSL: "true"
-      SSLMODE: "require"
+      - SHORTURL_DB_USER=${NEON_DB_USER}
+      - SHORTURL_DB_PASSWORD=${NEON_DB_PASSWORD}
+      - SSL=true
+      - SSLMODE=require
     restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    restart: unless-stopped
+
+  # Let's Encrypt companion
+  acme-companion:
+    image: nginxproxy/acme-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=shikifuiku@proton.me
+    depends_on:
+      - nginx-proxy
+    restart: unless-stopped
+
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
+
+
+# services:
+#   app:
+#     build: .
+#     ports:
+#       - 80:3001
+#       - 443:3001 # For HTTPS when you set it up
+#     environment:
+      # # Database credentials
+      # SHORTURL_DB_USER: ${NEON_DB_USER}
+      # SHORTURL_DB_PASSWORD: ${NEON_DB_PASSWORD}
+#       # Explicitly set SSL parameters for Neon DB
+#       SSL: "true"
+#       SSLMODE: "require"
+#     volumes:
+#       # Mount the certificates into your container
+#       - /etc/letsencrypt/live/hitoiki.co:/etc/certs
+#       - /etc/letsencrypt/archive/hitoiki.co:/etc/certs/archive
+#     restart: unless-stopped
