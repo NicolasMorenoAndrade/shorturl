@@ -20,6 +20,9 @@ services:
   # Nginx reverse proxy
   nginx-proxy:
     image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy  # Explicitly name the container
+    # labels:
+      # - "com.github.nginx-proxy.nginx"  # Add this label
     ports:
       - "80:80"
       - "443:443"
@@ -41,6 +44,7 @@ services:
       - acme:/etc/acme.sh
     environment:
       - DEFAULT_EMAIL=shikifuiku@proton.me
+      - NGINX_PROXY_CONTAINER=nginx-proxy  # Add this env var
     depends_on:
       - nginx-proxy
     restart: unless-stopped
