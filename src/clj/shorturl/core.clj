@@ -76,7 +76,9 @@
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]
      ["" {:handler (fn [req] {:body (serve-index) :status 200})}]]
     {:data {:muuntaja m/instance
-            :middleware [muuntaja/format-middleware]}})))
+            :middleware [muuntaja/format-middleware]}})
+   (ring/create-default-handler
+    {:not-found (fn [_] {:status 404, :body "Not found"})})))
 
 (defonce server
   ^{:doc "Atom holding the Jetty server instance. Will be nil when server is not running."}
