@@ -5,7 +5,7 @@
             [muuntaja.core :as m]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [shorturl.db :as db]
-            [shorturl.slug :refer [generate-slug]]
+            [shorturl.slug :refer [generate-slug sanitize-custom-slug sanitize-url]]
             [shorturl.migrations :as migrations]
             [clojure.java.io :as io])
   (:gen-class))
@@ -16,19 +16,25 @@
    Returns a 404 if the slug doesn't exist or 400 if no slug is provided."
   [req]
   (if-let [slug (get-in req [:path-params :slug])]
-    (if-let [url (db/get-url slug)]
-      (r/redirect url 307)
-      (r/status (r/response {:error "URL not found"}) 404))
+    (try
+      (if-let [url (db/get-url slug)]
+        (r/redirect url 307)
+        (r/status (r/response {:error "URL not found"}) 404))
+      (catch Exception e
+        (r/status (r/response {:error (.getMessage e)}) 500)))
     (r/status (r/response {:error "Slug is required"}) 400)))
 
 (defn create-redirect
   "Creates a new shortened URL.
    Takes a URL from the request body, generates a unique slug,
    stores the mapping in the database, and returns the slug.
-   Returns a 400 error if no URL is provided or if it's empty."
+   Returns a 400 error if no URL is provided, is empty, or is invalid.
+   Custom slugs must be at least 6 characters long."
   [req]
   (let [url (get-in req [:body-params :url])
-        slug (get-in req [:body-params :slug])]
+        custom-slug (get-in req [:body-params :slug])
+        sanitized-url (when url (sanitize-url url))
+        sanitized-slug (when custom-slug (sanitize-custom-slug custom-slug))]
     (cond
       (nil? url)
       (r/status (r/response {:error "URL is required"}) 400)
@@ -36,18 +42,28 @@
       (empty? url)
       (r/status (r/response {:error "URL cannot be empty"}) 400)
 
-      slug
+      ;; URL is invalid
+      (nil? sanitized-url)
+      (r/status (r/response {:error "Invalid URL format or potentially unsafe URL"}) 400)
+
+      ;; Custom slug provided but invalid
+      (and custom-slug (nil? sanitized-slug))
+      (r/status (r/response
+                 {:error "slug must be at least 6 characters long and contain only letters, numbers, underscores and dashes."})
+                400)
+
+      sanitized-slug
       (try
-        (db/insert-url-redirection! url slug)
-        (r/response {:slug slug :url url})
+        (db/insert-url-redirection! sanitized-url sanitized-slug)
+        (r/response {:slug sanitized-slug :url sanitized-url})
         (catch Exception e
           (r/status (r/response {:error (.getMessage e)}) 500)))
 
       :else
       (try
         (let [slug (generate-slug)]
-          (db/insert-url-redirection! url slug)
-          (r/response {:slug slug :url url}))
+          (db/insert-url-redirection! sanitized-url slug)
+          (r/response {:slug slug :url sanitized-url}))
         (catch Exception e
           (r/status (r/response {:error (.getMessage e)}) 500))))))
 
