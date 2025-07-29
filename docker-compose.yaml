@@ -1,7 +1,4 @@
-# version: '3'
-
 services:
-  # Your existing app service
   app:
     build: .
     expose:
@@ -20,9 +17,7 @@ services:
   # Nginx reverse proxy
   nginx-proxy:
     image: nginxproxy/nginx-proxy
-    container_name: nginx-proxy  # Explicitly name the container
-    # labels:
-      # - "com.github.nginx-proxy.nginx"  # Add this label
+    container_name: nginx-proxy  #  name of the container refered by acme
     ports:
       - "80:80"
       - "443:443"
@@ -44,7 +39,7 @@ services:
       - acme:/etc/acme.sh
     environment:
       - DEFAULT_EMAIL=shikifuiku@proton.me
-      - NGINX_PROXY_CONTAINER=nginx-proxy  # Add this env var
+      - NGINX_PROXY_CONTAINER=nginx-proxy #env var to connect acme container with nginx
     depends_on:
       - nginx-proxy
     restart: unless-stopped
@@ -56,21 +51,15 @@ volumes:
   acme:
 
 
+# Minimal docker-compose to build locally (no nginx no acme no SSL)
 # services:
 #   app:
 #     build: .
 #     ports:
-#       - 80:3001
-#       - 443:3001 # For HTTPS when you set it up
+#       - 8080:3001
 #     environment:
-      # # Database credentials
-      # SHORTURL_DB_USER: ${NEON_DB_USER}
-      # SHORTURL_DB_PASSWORD: ${NEON_DB_PASSWORD}
-#       # Explicitly set SSL parameters for Neon DB
+#       SHORTURL_DB_USER: ${NEON_DB_USER}
+#       SHORTURL_DB_PASSWORD: ${NEON_DB_PASSWORD}
 #       SSL: "true"
 #       SSLMODE: "require"
-#     volumes:
-#       # Mount the certificates into your container
-#       - /etc/letsencrypt/live/hitoiki.co:/etc/certs
-#       - /etc/letsencrypt/archive/hitoiki.co:/etc/certs/archive
-#     restart: unless-stopped
+#     restart: "no"

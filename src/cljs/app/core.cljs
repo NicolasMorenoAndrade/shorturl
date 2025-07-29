@@ -41,7 +41,9 @@
                   (d/div {:class-name "relative"}
                          (d/div {:class-name (get-in styles [:auth :container])}
                                 (d/div
-                                 (d/button {:class-name (get-in styles [:auth :user-icon])
+                                  (d/button {:class-name (get-in styles [:auth (if (:dropdown-open? state)
+                                                                                 :user-icon-clicked
+                                                                                 :user-icon-unclicked)])
                                             :on-click #(set-state assoc :dropdown-open?
                                                                   (not (:dropdown-open? state)))}
                                            (-> (get-in state [:user :display-name] "User")

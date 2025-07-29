@@ -9,7 +9,8 @@
    :auth
    {:container "absolute top-2 right-2"
     :button "text-sm text-gray-500 hover:text-lime-600 bg-transparent p-1 rounded-full transition-colors duration-200"
-    :user-icon "h-6 w-6 rounded-full bg-lime-100 focus:bg-lime-500 flex items-center justify-center text-lime-700 text-xs font-bold"
+    :user-icon-clicked "h-6 w-6 rounded-full bg-lime-500 flex items-center justify-center text-lime-700 text-xs font-bold"
+    :user-icon-unclicked "h-6 w-6 rounded-full bg-lime-100 flex items-center justify-center text-lime-700 text-xs font-bold"
     :dropdown "absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100"
     :dropdown-item "block px-4 py-2 text-sm text-gray-700 hover:text-lime-600 w-full text-left"
     :user-info "px-4 py-2 border-b border-gray-100"

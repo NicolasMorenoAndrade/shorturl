@@ -1,9 +1,16 @@
-GET http://localhost:3001/
+# GET http://localhost:3001/
 
 # POST http://localhost:3001/api/redirect/
 # Content-Type: application/json
 
 # {
-#      "url": "",
-#      "slug": "datomizzz"
+#      "url": "hitoiki.co"
 # }
+
+POST http://localhost:3001/api/redirect/
+Content-Type: application/json
+
+{
+     "url": "https://www.hitoiki.co",
+     "slug": ""
+}
