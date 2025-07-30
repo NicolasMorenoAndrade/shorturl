@@ -3,9 +3,6 @@ FROM clojure:tools-deps
 # it is an app; we need npm and a js runtime
 RUN apt-get update && apt-get install -y nodejs npm curl
 
-# Install Git LFS
-# RUN apt-get install -y git-lfs
-
 # it is what it is
 WORKDIR /usr/src/app
 
@@ -17,9 +14,6 @@ RUN npm install
 
 # Copy the entire repo: source code and resources
 COPY . .
-
-# Clone with LFS objects instead of copying
-# RUN git lfs pull
 
 # Process and optimize CSS with Tailwind
 RUN npx @tailwindcss/cli -i ./resources/public/assets/css/input.css -o ./resources/public/assets/css/output.css --minify
