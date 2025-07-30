@@ -24,8 +24,6 @@
 (defn sign-out []
   (signOut (getAuth)))
 
-
-
 (defn set-user! [set-state]
   "Updates application state with Firebase user information.
 

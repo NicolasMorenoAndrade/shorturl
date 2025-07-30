@@ -42,7 +42,6 @@
    (some #(str/includes? (str/lower-case url) %)
          ["javascript:" "data:" "vbscript:" "file:" "about:" "<%"])))
 
-
 (defn sanitize-url [url]
   (when (and url (not (empty? url)))
     (let [trimmed (str/trim url)
@@ -76,5 +75,4 @@
   (sanitize-url "https://www.hitoiki.co")
   (sanitize-url "file:")
   (sanitize-url "hjkjkjkjk")
-  (sanitize-url "hitoiki.pe")
-  )
+  (sanitize-url "hitoiki.pe"))

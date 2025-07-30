@@ -6,7 +6,8 @@
             [promesa.core :as p]
             [app.api :as api]
             [app.styles :refer [styles]]
-            [app.firebase :as firebase]))
+            [app.firebase :as firebase]
+            [app.hooks :refer [use-click-outside]]))
 
 (defn sign-out-reset-auth-dropdown! [set-state]
   (-> (firebase/sign-out)
@@ -25,12 +26,19 @@
               (p/then #(set-state assoc :slug (:slug %)))
               (p/finally #(set-state assoc :loading? false))))
         redirect-link
-        (str (.-origin js/window.location) "/" (:slug state) "/")]
+        (str (.-origin js/window.location) "/" (:slug state) "/")
+        auth-button-ref (hooks/use-ref nil)
+        dropdown-ref (hooks/use-ref nil)]
 
     ;; Set up auth listener on component mount
     (hooks/use-effect
      []  ;; Empty dependency array = run once on mount
      (firebase/set-user! set-state))
+
+    (use-click-outside
+     [auth-button-ref dropdown-ref]
+     #(when (:dropdown-open? state)
+        (set-state assoc :dropdown-open? false)))
 
     (hooks/use-effect
      [(:loading? state)]
@@ -41,9 +49,10 @@
                   (d/div {:class-name "relative"}
                          (d/div {:class-name (get-in styles [:auth :container])}
                                 (d/div
-                                  (d/button {:class-name (get-in styles [:auth (if (:dropdown-open? state)
-                                                                                 :user-icon-clicked
-                                                                                 :user-icon-unclicked)])
+                                 (d/button {:class-name (get-in styles [:auth (if (:dropdown-open? state)
+                                                                                :user-icon-clicked
+                                                                                :user-icon-unclicked)])
+                                            :ref auth-button-ref
                                             :on-click #(set-state assoc :dropdown-open?
                                                                   (not (:dropdown-open? state)))}
                                            (-> (get-in state [:user :display-name] "User")
@@ -51,15 +60,16 @@
                                                str)))
 
                                 (when (:dropdown-open? state)
-                                  (d/div {:class-name (get-in styles [:auth :dropdown])}
+                                  (d/div {:class-name (get-in styles [:auth :dropdown])
+                                          :ref dropdown-ref}
 
                                          ;; User info
                                          (d/div {:class-name (get-in styles [:auth :user-info])}
                                                 (if (:authenticated? state)
                                                   (d/div (d/p {:class-name (get-in styles [:auth :welcome])}
-                                                           (str (get-in state [:user :display-name])))
-                                                    (d/p {:class-name (get-in styles [:auth :email])}
-                                                      (str (get-in state [:user :email]))))
+                                                              (str (get-in state [:user :display-name])))
+                                                         (d/p {:class-name (get-in styles [:auth :email])}
+                                                              (str (get-in state [:user :email]))))
                                                   (d/p "Not signed-in")))
                                          (d/div
                                           (if (not (:authenticated? state))

@@ -1,4 +1,4 @@
-# GET http://localhost:3001/
+GET http://localhost:3001/julieta/
 
 # POST http://localhost:3001/api/redirect/
 # Content-Type: application/json
@@ -7,10 +7,18 @@
 #      "url": "hitoiki.co"
 # }
 
-POST http://localhost:3001/api/redirect/
-Content-Type: application/json
+# POST http://localhost:3001/api/redirect/
+# Content-Type: application/json
 
-{
-     "url": "https://www.hitoiki.co",
-     "slug": ""
-}
+# {
+#      "url": "https://www.hitoiki.co",
+#      "slug": ""
+# }
+
+
+# POST https://hitoiki.co/api/redirect/
+# Content-Type: application/json
+
+# {
+#      "url": "https://www.hitoiki.co"
+# }
