@@ -1,4 +1,4 @@
-GET http://localhost:3001/julieta/
+# GET http://localhost:3001/
 
 # POST http://localhost:3001/api/redirect/
 # Content-Type: application/json
@@ -21,4 +21,45 @@ GET http://localhost:3001/julieta/
 
 # {
 #      "url": "https://www.hitoiki.co"
+# }
+
+
+# Test User Verification Endpoint
+
+# 1. Create/Verify New User
+# POST http://localhost:3001/api/user/verify
+# Content-Type: application/json
+
+# {
+#     "firebase-uid": "testuser123",
+#     "email": "test@example.com",
+#     "display-name": "Test User"
+# }
+
+# 2. Verify Existing User (updates last_login)
+# POST http://localhost:3001/api/user/verify
+# Content-Type: application/json
+
+# {
+#     "firebase-uid": "testuser123",
+#     "email": "test@example.com",
+#     "display-name": "Test User"
+# }
+
+# 3. Missing Required Fields Test
+# POST http://localhost:3001/api/user/verify
+# Content-Type: application/json
+
+# {
+#     "email": "incomplete@example.com"
+# }
+
+# 4. Production URL Test
+# POST https://hitoiki.co/api/user/verify
+# Content-Type: application/json
+#
+# {
+#     "firebase-uid": "produser456",
+#     "email": "prod@example.com",
+#     "display-name": "Production User"
 # }
