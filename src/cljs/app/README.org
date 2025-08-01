@@ -1,44 +1,234 @@
-* Shorturl Frontend
-This is the frontend of this app.
+This document provides a comprehensive overview of the frontend architecture, state management, components, and development patterns used in this URL shortener application.
 
-** Development Notes
-#+begin_src clojurescript
-(let [[state set-state] (hooks/use-state {:slug nil :url ""})])
+** Architecture Overview
+
+The frontend is built with:
+
+- *ClojureScript*: For writing React applications in a functional, immutable style
+- *Helix*: A thin wrapper around React that provides idiomatic ClojureScript bindings
+- *Shadow-CLJS*: For ClojureScript compilation and hot reloading
+- *Tailwind CSS*: For styling through utility classes
+- *Firebase Authentication*: For user management
+- *Promesa*: For promise-based async operations
+
+** Component Structure
+
+The application follows a simple component structure:
+
+#+begin_src
+app.core/app                    # Main application component
+├── Authentication dropdown     # User authentication UI
+└── URL Shortening form/results # Core URL shortening functionality
 #+end_src
 
-1. *React Hook Basics*
-- =use-state= is a fundamental [[https://react.dev/reference/react/hooks][React Hook]] that lets you add state to functional components
-- Helix is a ClojureScript wrapper around React. eg. =hooks/use-state= wraps React's =useState=
-- The hook returns a vector containing two elements:
-  1. The current state value
-  2. A function to update that state
+** State Management
 
-2. *Initial State*
-#+begin_src clojurescript
-{:slug nil :url ""}
-#+end_src
-- This map is the initial state
-- =:slug= starts as =nil= (no shortened URL yet)
-- =:url= starts as an empty string (empty input field)
-
-3. *Destructuring*
-#+begin_src clojurescript
-[state set-state]
-#+end_src
-- Uses Clojure's vector destructuring to assign names to the two returned values
-- =state= will contain the current state map
-- =set-state= is the function used to update the state
-
-4. *Usage Example in shorturl core.cljs*:
+The application uses React hooks for state management through Helix:
 
 #+begin_src clojurescript
-;; Reading state
-(:url state)  ;; gets the current URL value
-
-;; Updating state when input changes
-(set-state assoc :url (.. % -target -value))
-
-;; Updating state after API call
-(-> (api/create-short-url (:url state))
-    (p/then #(set-state assoc :slug (:slug %))))
+(let [[state set-state] (hooks/use-state {:user {:display-name "" :email ""}
+                                          :authenticated? false
+                                          :slug nil :url "" :custom-slug ""
+                                          :loading? false :dropdown-open? false})]
+  ;; Components that use and modify this state
+  )
 #+end_src
+
+*** State Keys
+
+- *=:user=*: Contains Firebase user data (display name, email)
+- *=:authenticated?=*: Boolean indicating authentication status
+- *=:slug=*: The generated/custom short URL slug
+- *=:url=*: The original URL being shortened
+- *=:custom-slug=*: User-provided custom slug
+- *=:loading?=*: Loading state during API calls
+- *=:dropdown-open?=*: UI state for auth dropdown
+
+*** State Updates
+
+State is updated in response to:
+
+1. *User input*:
+   #+begin_src clojurescript
+   (set-state assoc :url (.. % -target -value))
+   #+end_src
+
+2. *API responses*:
+   #+begin_src clojurescript
+   (-> (api/fetch-slug (:url state) (:custom-slug state))
+       (p/then #(set-state assoc :slug (:slug %)))
+       (p/finally #(set-state assoc :loading? false)))
+   #+end_src
+
+3. *Authentication events*:
+   #+begin_src clojurescript
+   (firebase/set-user! set-state)
+   #+end_src
+
+** API Integration
+
+API calls are abstracted in the =app.api= namespace:
+
+#+begin_src clojurescript
+(defn fetch-slug [url slug]
+  ;; Makes POST request to backend API
+  ;; Returns a promise that resolves to response data
+  )
+
+(defn verify-firebase-user [firebase-user]
+  ;; Verifies user with backend API
+  ;; Returns a promise that resolves to verified user data
+  )
+#+end_src
+
+*** Promise-based Flow
+
+The application uses =promesa.core= to handle async operations:
+
+#+begin_src clojurescript
+(-> (api/fetch-slug (:url state) (:custom-slug state))
+    (p/then #(set-state assoc :slug (:slug %)))
+    (p/catch #(js/console.error "Error:" %))
+    (p/finally #(set-state assoc :loading? false)))
+#+end_src
+
+** Firebase Authentication
+
+User authentication is handled in =app.firebase=:
+
+*** Key Functions
+
+- *=init=*: Initializes Firebase app configuration
+- *=google-sign-in=*: Triggers Google Authentication popup
+- *=sign-out=*: Signs out the current user
+- *=set-user!=*: Sets up auth state listener and updates app state
+
+*** Auth Flow
+
+1. User clicks sign-in button
+2. Google auth popup appears
+3. On successful auth, Firebase returns user data
+4. Frontend verifies user with backend API
+5. UI updates to show authenticated state
+
+** Custom Hooks
+
+The application includes custom hooks in =app.hooks=:
+
+#+begin_src clojurescript
+(defn use-click-outside [refs callback]
+  ;; Calls callback when click occurs outside referenced elements
+  )
+#+end_src
+
+** Styling Approach
+
+Styling uses Tailwind CSS through a centralized styles map in =app.styles=:
+
+#+begin_src clojurescript
+(def styles
+  {:container "bg-lime-100 grid place-items-center h-screen p-2"
+   :card "bg-white rounded-lg shadow-md p-8 w-full max-w-md"
+   ;; more styles...
+   })
+#+end_src
+
+This approach:
+- Centralizes all styling in one file
+- Allows for easy theme changes
+- Keeps components clean using =(get-in styles [:path :to :style])=
+
+** Development Workflow
+
+*** Starting the Frontend Dev Server
+
+#+begin_src bash
+# Start shadow-cljs dev server with hot reloading
+npx shadow-cljs watch app
+#+end_src
+
+This starts the development server on port 5003, which proxies API requests to the backend server (expected on port 3001).
+
+*** REPL-Based Development
+
+The application is designed for REPL-driven development:
+
+1. Connect to running shadow-cljs REPL
+2. Make changes to code and evaluate
+3. See changes reflected immediately
+
+*** Build for Production
+
+#+begin_src bash
+# Process and minify CSS
+npx @tailwindcss/cli -i ./resources/public/assets/css/input.css -o ./resources/public/assets/css/output.css --minify
+
+# Build optimized JS bundle
+npx shadow-cljs release app
+#+end_src
+
+** Key Design Patterns
+
+*** 1. Data-Driven UI
+
+The UI rendering is based directly on application state:
+
+#+begin_src clojurescript
+(if (:slug state)
+  ;; Render result view with shortened URL
+  (d/div {:class-name (get-in styles [:result-section :container])} ...)
+
+  ;; Render input form for URL shortening
+  (d/form {:on-submit ...} ...))
+#+end_src
+
+*** 2. Centralized State
+
+All state is managed in the top-level component and passed down through props/closures.
+
+*** 3. Async Operation Pattern
+
+#+begin_src
+1. Update UI to loading state
+2. Make API call
+3. Handle success (update state)
+4. Handle errors
+5. Reset loading state
+#+end_src
+
+*** 4. Conditional Rendering
+
+Components render different UI based on application state:
+
+#+begin_src clojurescript
+(if (:authenticated? state)
+  ;; Show authenticated user UI
+  ;; Show login UI
+)
+#+end_src
+
+** Future Enhancements Considerations
+
+- Add form validation with helpful error messages
+- Implement URL history for authenticated users
+- Add click tracking and analytics
+- Support for URL expiration options
+
+** Troubleshooting
+
+*** Common Issues
+
+1. *Authentication issues*: Check browser console for Firebase errors
+2. *API connection problems*: Ensure backend server is running on port 3001
+3. *Styling inconsistencies*: Run Tailwind build if custom styles aren't applying
+
+*** Development Debugging
+
+Use the browser's developer console to inspect:
+- Network requests to API endpoints
+- Console logs from the application
+- React component structure via React DevTools
+
+---
+
+This README serves as both documentation and a reference for understanding the frontend architecture and patterns used in this URL shortener application.
