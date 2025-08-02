@@ -26,6 +26,14 @@
 (defn sign-out []
   (signOut (getAuth)))
 
+(defn sign-out-with-callback! [on-success on-error]
+  (-> (sign-out)
+      (p/then (fn [_]
+                (.log js/console "Signed out successfully")
+                (when on-success (on-success))))
+      (p/catch (fn [err]
+                 (.error js/console "Error signing out:" err)
+                 (when on-error (on-error err))))))
 (defn set-user!
   "Updates application state with Firebase user information.
 

@@ -1,4 +1,4 @@
-(ns shorturl.migrations.
+(ns shorturl.migrations
   (:require [shorturl.db :refer [execute-query]]
             [honey.sql :as sql]))
 
@@ -63,7 +63,6 @@
       [:display_name :text]
       [:created_at :timestamp [:default :current_timestamp]]
       [:last_login :timestamp]]})))
-
 
 (defn drop-users-table!
   "Drops the users table if it exists.

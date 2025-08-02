@@ -9,27 +9,24 @@
             [app.firebase :as firebase]
             [app.hooks :refer [use-click-outside]]))
 
-(defn sign-out-reset-auth-dropdown! [set-state]
-  (-> (firebase/sign-out)
-      (p/then (fn [_] (.log js/console "Signed out successfully")
-                (set-state assoc :dropdown-open? false)))
-      (p/catch (fn [err] (.error js/console "Error signing out:" err)))))
-
 (defnc app []
   (let [[state set-state] (hooks/use-state {:user {:display-name "" :email ""} :authenticated? false
                                             :slug nil :url "" :custom-slug ""
-                                            :loading? false :dropdown-open? false})
+                                            :loading? false :dropdown-open? false
+                                            :error nil})
         handle-shorten-url
         (fn []
           (set-state assoc :loading? true)
           (-> (api/fetch-slug (:url state) (:custom-slug state))
-              (p/then #(set-state assoc :slug (:slug %)))
-              (p/finally #(set-state assoc :loading? false))))
+              (p/then #(set-state assoc :slug (:slug %) :error (:error %)))
+              (p/finally #(set-state assoc :loading? false))
+              ))
         redirect-link
         (str (.-origin js/window.location) "/" (:slug state) "/")
         auth-button-ref (hooks/use-ref nil)
         dropdown-ref (hooks/use-ref nil)]
 
+    ;; declare hooks
     ;; Set up auth listener on component mount
     (hooks/use-effect
      []  ;; Empty dependency array = run once on mount
@@ -78,7 +75,10 @@
                                                        :on-click #(firebase/google-sign-in)}
                                                       "Sign in")
                                             (d/button {:class-name (get-in styles [:auth :dropdown-item])
-                                                       :on-click #(sign-out-reset-auth-dropdown! set-state)}
+                                                       :on-click
+                                                       (fn [] (firebase/sign-out-with-callback!
+                                                               #(set-state assoc :dropdown-open? false)
+                                                               #(.error js/console "Sign out failed:" %)))}
                                                       "Sign out")))))))
 
                   (d/h1 {:class-name (get styles :title)}
@@ -135,7 +135,11 @@
                                         (d/div {:class-name (get-in styles [:loading :container])}
                                                (d/span {:class-name (get-in styles [:loading :spinner])})
                                                "Shortening...")
-                                        "Shorten URL"))))
+                                        "Shorten URL"))
+                      (when (:error state)
+                        (d/p {:class-name (get styles :error)}
+               (:error state)))
+                            ))
                   (d/div {:class-name (get-in styles [:auth :container])})))))
 
 (defn ^:export init
