@@ -10,6 +10,43 @@
             [clojure.java.io :as io])
   (:gen-class))
 
+(defn verify-user
+  "Verifies a Firebase-authenticated user and ensures they exist in the database.
+
+   When a user authenticates with Firebase, this endpoint:
+   1. Checks if they exist in the database by Firebase UID
+   2. If not, creates a new user record with their Firebase profile data
+   3. If they exist, updates their last login timestamp
+
+   Parameters (in request body):
+   - firebase-uid: The Firebase Authentication UID
+   - email: User's email address
+   - display-name: User's display name
+
+   Returns:
+   - The user data with 200 status if successful
+   - Error with appropriate status code on failure"
+  [req]
+  (let [firebase-uid (get-in req [:body-params :firebase-uid])
+        email (get-in req [:body-params :email])
+        display-name (get-in req [:body-params :display-name])]
+    (try
+      (if (and firebase-uid email)
+        (let [existing-user (db/get-user-by-firebase-uid firebase-uid)]
+          (if existing-user
+            ;; User exists - update last login
+            (do (db/update-user-last-login! firebase-uid)
+                (r/response existing-user))
+            ;; New user - create record
+            (do (db/create-user! firebase-uid email display-name)
+                (r/response {:firebase_uid firebase-uid
+                             :email email
+                             :display_name display-name}))))
+        ;; Missing required fields
+        (r/status (r/response {:error "Firebase UID and email are required"}) 400))
+      (catch Exception e
+        (r/status (r/response {:error (.getMessage e)}) 500)))))
+
 (defn redirect
   "Handles redirection requests for shortened URLs.
    Looks up the slug in the database and redirects to the original URL if found.
@@ -49,9 +86,8 @@
       ;; Custom slug provided but invalid
       (and custom-slug (nil? sanitized-slug))
       (r/status (r/response
-                 {:error "slug must be at least 6 characters long and contain only letters, numbers, underscores and dashes."})
-                400)
-
+                 {:error (str "slug must be at least 6 characters long and contain only "
+                              "letters, numbers, underscores and dashes.")}) 400)
       sanitized-slug
       (try
         (db/insert-url-redirection! sanitized-url sanitized-slug)
@@ -88,7 +124,8 @@
     ["/"
      [":slug/" redirect]
      ["api/"
-      ["redirect/" {:post create-redirect}]]
+      ["redirect/" {:post create-redirect}]
+      ["user/verify" {:post verify-user}]]
      ["assets/*" (ring/create-resource-handler {:root "public/assets"})]
      ["" {:handler (fn [req] {:body (serve-index) :status 200})}]]
     {:data {:muuntaja m/instance

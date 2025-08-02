@@ -5,7 +5,6 @@
   {:container "bg-lime-100 grid place-items-center h-screen p-2"
    :card "bg-white rounded-lg shadow-md p-8 w-full max-w-md"
    :title "text-2xl font-bold text-lime-800 mb-6 text-center"
-
    :auth
    {:container "absolute top-2 right-2"
     :button "text-sm text-gray-500 hover:text-lime-600 bg-transparent p-1 rounded-full transition-colors duration-200"
@@ -30,7 +29,7 @@
     :button {:base "w-full bg-lime-600 text-white py-2 px-4 rounded-md transition-colors duration-200 font-medium mt-2"
              :enabled "hover:bg-lime-700 cursor-pointer"
              :disabled "opacity-70 cursor-not-allowed"}}
-
    :loading
    {:container "flex items-center justify-center"
-    :spinner "animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"}})
+    :spinner "animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"}
+   :error "text-red-500 text-sm"})

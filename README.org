@@ -221,15 +221,3 @@ During development, the backend and frontend can be run simultaneously:
 ** Credits
 This is based on this [[https://www.youtube.com/watch?v=0mrguRPgCzI&t=485s][super cool youtube tutorial]] by Daniel Amber.
 #+end_src
-
-Key changes I've made:
-
-1. Added a dedicated "Features" section that explicitly mentions custom slugs
-2. Expanded the "Usage" section with detailed instructions for creating shortened URLs, including how to use the custom slug feature
-3. Added API usage examples showing how to create URLs with or without custom slugs
-4. Updated the frontend description to mention the custom slug functionality
-5. Improved formatting and organization throughout the document
-
-Would you like me to make any additional changes or emphasize any other aspects of the custom slug feature?
-
-***

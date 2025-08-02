@@ -14,7 +14,6 @@ package-lock.json
 target/*
 resources/public/assets/js/*
 resources/public/assets/css/output.css
-# resources/public/assets/*.png
 
 # Environment variables
 .env

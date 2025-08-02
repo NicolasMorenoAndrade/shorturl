@@ -7,7 +7,8 @@
 
 (def db-spec
   "Database connection specification for PostgreSQL.
-   Uses environment variables for configuration."
+   uses environment variables from env namespace for configuration,
+   secrets from actual environment"
   {:dbtype "postgresql"
    :dbname (env :DBNAME)
    :host (env :HOST)
@@ -62,12 +63,62 @@
                      (h/where [:= :original_url url])
                      (sql/format))))
 
+(defn get-user-by-firebase-uid
+  "Retrieve a user by their Firebase UID.
+   Returns the entire user record or nil if not found.
+
+   Parameters:
+   - firebase-uid: The unique identifier from Firebase Authentication
+
+   Returns:
+   - The user record as a map, or nil if no user is found"
+  [firebase-uid]
+  (-> (execute-query (-> (h/select :*)
+                         (h/from :users)
+                         (h/where [:= :firebase_uid firebase-uid])
+                         (sql/format)))
+      first))
+
+(defn create-user!
+  "Create a new user record from Firebase authentication data.
+
+   Parameters:
+   - firebase-uid: The unique identifier from Firebase Authentication
+   - email: The user's email address
+   - display-name: The user's display name (optional)
+
+   Returns:
+   - The result of the insert operation"
+  [firebase-uid email display-name]
+  (execute-query (-> (h/insert-into :users)
+                     (h/columns :firebase_uid :email :display_name :last_login)
+                     (h/values [[firebase-uid email display-name (java.sql.Timestamp. (System/currentTimeMillis))]])
+                     (sql/format))))
+
+(defn update-user-last-login!
+  "Update the last_login timestamp for a user.
+
+   Parameters:
+   - firebase-uid: The unique identifier from Firebase Authentication
+
+   Returns:
+   - The result of the update operation"
+  [firebase-uid]
+  (execute-query (-> (h/update :users)
+                     (h/set {:last_login (java.sql.Timestamp. (System/currentTimeMillis))})
+                     (h/where [:= :firebase_uid firebase-uid])
+                     (sql/format))))
+
 (comment
-;; Test connection
+
+  ;; Test migrations (this should do nothing if the table exists)
+  (require '[shorturl.migrations :as migrations])
+  (migrations/create-shortened-urls-table!)
+
+  ;; Test connection
   (jdbc/execute! ds ["SELECT 1"])
 
-  (require '[shorturl.migrations :as mig])
-  (mig/create-shortened-urls-table!)
+  (get-user-by-firebase-uid "U91UwTPlpNNOtKKghw038cHpJwg2")
 
   (jdbc/execute! ds ["CREATE TABLE IF NOT EXISTS shortened_urls (
                     id SERIAL PRIMARY KEY,

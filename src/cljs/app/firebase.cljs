@@ -1,7 +1,9 @@
 (ns app.firebase
   (:require
    ["firebase/app" :as firebase]
-   ["firebase/auth" :refer [GoogleAuthProvider getAuth signInWithPopup onAuthStateChanged signOut]]))
+   ["firebase/auth" :refer [GoogleAuthProvider getAuth signInWithPopup onAuthStateChanged signOut]]
+   [app.api :as api]
+   [promesa.core :as p]))
 
 (defn init []
   ;; initialize firebase app. runs once.
@@ -24,7 +26,15 @@
 (defn sign-out []
   (signOut (getAuth)))
 
-(defn set-user! [set-state]
+(defn sign-out-with-callback! [on-success on-error]
+  (-> (sign-out)
+      (p/then (fn [_]
+                (.log js/console "Signed out successfully")
+                (when on-success (on-success))))
+      (p/catch (fn [err]
+                 (.error js/console "Error signing out:" err)
+                 (when on-error (on-error err))))))
+(defn set-user!
   "Updates application state with Firebase user information.
 
    Parameters:
@@ -32,7 +42,9 @@
 
    The function sets up an auth state listener that will:
    - Store user information when signed in
+   - Verify user with backend database
    - Clear user when signed out"
+  [set-state]
   ;; Make sure Firebase is initialized first
   (init)
   (let [auth (getAuth)]
@@ -44,10 +56,21 @@
          (let [user-data {:uid (.-uid user)
                           :email (.-email user)
                           :display-name (.-displayName user)}]
+           ;; Update UI immediately to show authenticated state
            (set-state (fn [current-state]
                         (assoc current-state
                                :user user-data
-                               :authenticated? true))))
+                               :authenticated? true)))
+
+           ;; Verify with backend (non-blocking)
+           (-> (api/verify-firebase-user user-data)
+               (p/then (fn [verified-user]
+                         (.log js/console "User verified with backend")
+                         ;; Optional: update state with additional user data from DB
+                         ))
+               (p/catch (fn [err]
+                          ;; Log error but don't block the user
+                          (.error js/console "Error verifying user with backend:" err)))))
 
          ;; User is signed out
          (set-state (fn [current-state]
