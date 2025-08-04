@@ -40,10 +40,11 @@
 
 (defn insert-url-redirection!
   "Create a new URL redirection by storing the original URL and its short code.
+   Optionally associates with a user (user-id can be nil).
    Returns the result of the insert operation."
   [url slug]
   (execute-query (-> (h/insert-into :shortened_urls)
-                     (h/columns :original_url :slug)
+                     (h/columns :original_url :slug :user_id)
                      (h/values [[url slug]])
                      (sql/format))))
 
@@ -162,6 +163,12 @@
                      (h/where [:= :slug "palmita"])
                      (sql/format)))
 
+  (let [{:keys [url slug]} {:url "https://clojure.org/releases/downloads" :slug "clj"}]
+    (-> (h/insert-into :shortened_urls)
+                     (h/columns :original_url :slug :user_id)
+                     (h/values [[url slug]])
+                     (sql/format))
+    )
   (insert-url-redirection! "https://clojure.org/releases/downloads" "clj")
 
   (remove-by-slug! "datomic")

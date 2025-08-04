@@ -21,13 +21,14 @@
      [[:id :serial [:primary-key]]
       [:original_url :text [:not nil]]
       [:slug [:varchar 10] [:not nil] [:unique]]
-      [:created_at :timestamp [:default :current_timestamp]]]})))
+      [:created_at :timestamp [:default :current_timestamp]]
+      [:user_id :integer [:references :users]]]})))
 
 (defn drop-shortened-urls-table!
   "Drops the shortened_urls table if it exists.
 
    This will completely remove the table and all of its data.
-   USE WITH CAUTION!, especially in production environments.
+   USE WITH CAUTION!
 
    Parameters:
    - cascade: (optional) If true, drops dependent objects like constraints. Default: false
@@ -68,7 +69,7 @@
   "Drops the users table if it exists.
 
    This will completely remove the table and all of its data.
-   USE WITH CAUTION!, especially in production environments.
+   USE WITH CAUTION!
 
    Parameters:
    - cascade: (optional) If true, drops dependent objects like constraints. Default: false
@@ -86,12 +87,13 @@
      {:drop-table [:if-exists :users]
       :cascade cascade}))))
 
+;; Update the run-migrations! function to run the new migration
 (defn run-migrations!
   "Runs all migrations to set up the database schema.
    This should be called during application initialization."
   []
-  (create-shortened-urls-table!)
-  (create-users-table!))
+  (create-users-table!)
+  (create-shortened-urls-table!))
 
 (comment
   ;; (drop-shortened-urls-table!)
@@ -99,4 +101,15 @@
   ;; TODO need better message when dropping table
 
   (run-migrations!)
-  (create-users-table!))
+  (create-users-table!)
+
+  ;; (defn add-user-id-to-shortened-urls-table!
+  ;;   "Adds a user_id column to the shortened_urls table as a foreign key reference to users(id)."
+  ;;   []
+  ;;   (execute-query
+  ;;    (sql/format
+  ;;     {:alter-table :shortened_urls
+  ;;      :add-column [:user_id :integer [:references :users]]})))
+
+  ;; (add-user-id-to-shortened-urls-table!)
+  )
