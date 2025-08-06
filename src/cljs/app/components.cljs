@@ -54,9 +54,11 @@
   (d/div
    {:class-name (get-in styles [:auth :container])}
    (d/button
-    {:class-name (get-in styles [:auth (if (:dropdown-open? state)
-                                         :user-icon-clicked
-                                         :user-icon-unclicked)])
+    {:class-name (str (get-in styles [:auth :user-icon :base]) " "
+                      (if (:dropdown-open? state)
+                        (get-in styles [:auth :user-icon :clicked])
+                        (get-in styles [:auth :user-icon :unclicked])))
+
      :ref auth-button-ref
      :on-click #(toggle-dropdown state set-state)}
     (-> (get-in state [:user :display-name] "User")

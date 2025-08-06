@@ -112,6 +112,21 @@
 
 (comment
 
+  (defn create-sessions-table!
+  "Creates the sessions table for custom auth management."
+  []
+  (execute-query
+   (sql/format
+    {:create-table [:sessions :if-not-exists]
+     :with-columns
+     [[:id :uuid [:primary-key]] ;; Generated session ID
+      [:user_id :integer [:not nil] [:references :users] :on-delete :cascade]
+      [:created_at :timestamp [:default :current_timestamp]]
+      [:expires_at :timestamp [:not nil]]
+      [:last_active_at :timestamp]]})))
+
+  (create-sessions-table!)
+
   ;; Test migrations (this should do nothing if the table exists)
   (require '[shorturl.migrations :as migrations])
   (migrations/create-shortened-urls-table!)
@@ -127,6 +142,19 @@
                     slug VARCHAR(10) UNIQUE NOT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                   )"])
+
+  (jdbc/execute! ds ["CREATE TABLE IF NOT EXISTS sessions (
+    id UUID PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    expires_at TIMESTAMP NOT NULL,
+    last_active_at TIMESTAMP)"])
+
+  (sql/format
+   {:create-table [:sessions :if-not-exists]
+    :with-columns [[:id :uuid [:primary-key]]
+                   [:user_id :integer [:not nil] [:references :users [:on-delete :cascade]]]
+                   ]})
 
   (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
 
