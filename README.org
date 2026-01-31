@@ -1,4 +1,4 @@
-
+#+STARTUP: indent starshide
 * URL shortener
 
 A full-stack URL shortening application built with Clojure, ClojureScript, and PostgreSQL.
@@ -49,6 +49,7 @@ The application will automatically run migrations when started, but they can man
 (require '[shorturl.migrations :as migrations])
 (migrations/run-migrations!)
 #+end_src
+
 
 ** Running the Application in development
 
@@ -167,12 +168,11 @@ This is where the app server is defined.
 
 **** =(ring-jetty/run-jetty #'app {:port port :join? false})=
 
-This line starts the Jetty web server with your Ring application. Let's break down the syntax:
+This line starts the Jetty web server with the Ring application. Let's break down the syntax:
 
-***** =ring-jetty/run-jetty=
+**** =ring-jetty/run-jetty= ajklj
 
-- =ring-jetty= is a namespace alias for =ring.adapter.jetty=
-- =run-jetty= is a function from that namespace that starts a Jetty server
+
 
 ***** =#'app=
 
@@ -220,4 +220,3 @@ During development, the backend and frontend can be run simultaneously:
 
 ** Credits
 This is based on this [[https://www.youtube.com/watch?v=0mrguRPgCzI&t=485s][super cool youtube tutorial]] by Daniel Amber.
-#+end_src
