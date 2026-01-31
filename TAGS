@@ -1,0 +1,30 @@
+
+src/clj/shorturl/slug.clj,129
+;; - No '0' (zero) vs 'O' (letter O) confusion5,139
+;; - No '1' (one) vs 'l' (lowercase L) vs 'I' (uppercase i) confusion6,186
+
+src/cljs/app/hooks.cljs,53
+;; You could later add other hooks here:here16,602
+
+src/cljs/app/core.cljs,43
+     []  ;; Empty dependency array 21,868
+
+src/cljs/app/firebase.cljs,95
+                          (.error js/console "Error verifying user with backend:" err)73,2776
+
+src/cljs/app/styles.cljs,27
+(ns app.styles)styles1,0
+
+src/cljs/app/components.cljs,0
+
+src/cljs/app/handlers.cljs,0
+
+src/cljs/app/api.cljs,0
+
+src/clj/shorturl/migrations.clj,0
+
+src/clj/shorturl/db.clj,0
+
+src/clj/shorturl/core.clj,0
+
+src/clj/shorturl/env.clj,0
