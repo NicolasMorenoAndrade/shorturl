@@ -13,8 +13,6 @@ services:
       - SSL=true
       - SSLMODE=require
     restart: unless-stopped
-    networks:
-      -nginx-prxy
 
   # Nginx reverse proxy
   nginx-proxy:
