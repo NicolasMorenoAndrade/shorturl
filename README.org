@@ -20,7 +20,6 @@ This application allows users to create shortened URLs through a simple web inte
 - RESTful API for integration with other services
 
 ** Setup and Installation
-
 *** Prerequisites
 
 - Clojure
@@ -49,7 +48,6 @@ The application will automatically run migrations when started, but they can man
 (require '[shorturl.migrations :as migrations])
 (migrations/run-migrations!)
 #+end_src
-
 
 ** Running the Application in development
 

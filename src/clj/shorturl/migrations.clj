@@ -1,5 +1,6 @@
 (ns shorturl.migrations
-  (:require [shorturl.db :refer [execute-query]]
+  (:require [shorturl.db :refer [execute-query
+                                 add-user-id-column-to-shortened-urls!]]
             [honey.sql :as sql]))
 
 (defn create-shortened-urls-table!
@@ -91,7 +92,8 @@
    This should be called during application initialization."
   []
   (create-shortened-urls-table!)
-  (create-users-table!))
+  (create-users-table!)
+  (add-user-id-column-to-shortened-urls!));
 
 (comment
   ;; (drop-shortened-urls-table!)
@@ -99,4 +101,18 @@
   ;; TODO need better message when dropping table
 
   (run-migrations!)
-  (create-users-table!))
+  (create-users-table!)
+
+
+  ;; Verify the schema
+  (require '[shorturl.db :as db])
+
+  (db/execute-query
+   (honey.sql/format
+    {:select [:column_name :data_type :is_nullable]
+     :from [:information_schema.columns]
+     :where [:and
+             [:= :table_name "shortened_urls"]
+             [:= :table_schema "public"]]}))
+
+  )

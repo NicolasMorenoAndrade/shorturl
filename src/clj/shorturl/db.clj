@@ -109,10 +109,35 @@
                      (h/where [:= :firebase_uid firebase-uid])
                      (sql/format))))
 
+(defn add-user-id-column-to-shortened-urls!
+  "Adds user_id column to shortened_urls table and clears existing data.
+
+   Steps:
+   1. Deletes all existing rows (fresh start)
+   2. Adds user_id column (nullable, foreign key to users.id)
+   3. Sets up ON DELETE SET NULL (anonymous URLs remain if user deleted)
+
+   Returns:
+   - The result of the alter table operation"
+  []
+  ;; First, clear existing data
+  (println "Deleting existing slugs...")
+  (execute-query (sql/format {:delete-from :shortened_urls}))
+
+  ;; Then add the user_id column with raw SQL
+  (println "Adding user_id column...")
+  (execute-query
+   ["ALTER TABLE shortened_urls
+     ADD COLUMN user_id INTEGER
+     REFERENCES users(id)
+     ON DELETE SET NULL"]))
+
 (comment
 
   ;; Test migrations (this should do nothing if the table exists)
   (require '[shorturl.migrations :as migrations])
+
+  (add-user-id-column-to-shortened-urls!)
   (migrations/create-shortened-urls-table!)
 
   ;; Test connection
@@ -128,6 +153,8 @@
                   )"])
 
   (jdbc/execute! ds ["SELECT * FROM shortened_urls"])
+
+
 
   (count (jdbc/execute! ds (sql/format {:select [:*]
                                         :from [:shortened_urls]})))
