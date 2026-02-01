@@ -6,13 +6,22 @@
             [app.styles :refer [styles]]
             [app.firebase :as firebase]
             [app.hooks :refer [use-click-outside]]
-            [app.components :refer [AuthComponent ResultSection FormComponent]]))
+            [app.components :refer [AuthComponent ResultSection FormComponent UserSlugsSection]]))  ; Add UserSlugsSection
 
 (defnc app []
-  (let [[state set-state] (hooks/use-state {:user {:display-name "" :email ""} :authenticated? false
-                                            :slug nil :url "" :custom-slug ""
-                                            :loading? false :dropdown-open? false
-                                            :error nil})
+  (let [[state set-state] (hooks/use-state {:user {:display-name "" :email ""}
+                                            :authenticated? false
+                                            :slug nil
+                                            :url ""
+                                            :custom-slug ""
+                                            :loading? false
+                                            :dropdown-open? false
+                                            :error nil
+                                            ;; NEW FIELDS for slugs management
+                                            :user-slugs nil              ; nil = not loaded, [] = empty, [items] = loaded
+                                            :slugs-loading? false        ; loading state for fetch
+                                            :slugs-section-open? false   ; collapsible section state
+                                            :deleting-slug nil})         ; track which slug is being deleted
         auth-button-ref (hooks/use-ref nil)
         dropdown-ref (hooks/use-ref nil)]
 
@@ -40,7 +49,10 @@
         (d/h1 {:class-name (get styles :title)} "URL Shortener")
         (if (:slug state)
           ($ ResultSection {:state state :set-state set-state})
-          ($ FormComponent {:state state :set-state set-state}))))))
+          ($ FormComponent {:state state :set-state set-state}))
+        ;; NEW: Add UserSlugsSection below form/result
+        ($ UserSlugsSection {:state state :set-state set-state})))))
+
 
 (defn ^:export init
   "Initializes the URL shortener application.

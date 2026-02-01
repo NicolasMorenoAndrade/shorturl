@@ -16,6 +16,19 @@
     :welcome "text-sm font-medium text-gray-700"
     :email "text-xs text-gray-500"}
 
+   :slugs-section
+   {:container "mt-6 border-t border-gray-200 pt-4"
+    :header "flex justify-between items-center cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+    :title "text-lg font-semibold text-gray-700"
+    :toggle "text-gray-500 text-xl"
+    :list "mt-4 space-y-3"
+    :item {:container "border border-gray-200 rounded p-3 hover:border-lime-300 transition-colors"
+           :slug "text-lime-600 hover:text-lime-700 cursor-pointer font-medium text-lg"
+           :url "text-sm text-gray-500 mt-1 break-all"
+           :delete-btn "text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"}
+    :empty "text-center text-gray-500 py-8 italic"
+    :loading "text-center text-gray-500 py-4"}
+
    :result-section
    {:container "text-center"
     :label "mb-3 text-gray-600"

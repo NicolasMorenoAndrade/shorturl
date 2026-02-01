@@ -35,3 +35,35 @@
           json-data (.json response)
           data (js->clj json-data :keywordize-keys true)]
     data))
+
+(defn fetch-user-slugs
+  "Fetches all shortened URLs for the authenticated user.
+   Returns a promise that resolves to a list of slug objects.
+
+   Each slug object contains:
+   - :slug - the short URL identifier
+   - :original_url - the destination URL
+   - :created_at - timestamp of creation"
+  []
+  (p/let [response (js/fetch "/api/user/slugs"
+                             (clj->js {:method "GET"
+                                       :credentials "same-origin"}))
+          json-data (.json response)
+          data (js->clj json-data :keywordize-keys true)]
+    data))
+
+(defn delete-slug
+  "Deletes a shortened URL by its slug.
+
+   Requires authentication and ownership.
+   Returns a promise that resolves when deletion is complete.
+
+   Parameters:
+   - slug: The short URL identifier to delete"
+  [slug]
+  (p/let [response (js/fetch (str "/api/redirect/" slug "/")
+                             (clj->js {:method "DELETE"
+                                       :credentials "same-origin"}))
+          json-data (.json response)
+          data (js->clj json-data :keywordize-keys true)]
+    data))

@@ -1,3 +1,39 @@
+# DELETE http://localhost:3001/api/redirect/yyz6HV/
+# Cookie: ring-session=ac5cc944-e208-4448-ac49-f42ad20b8de2
+
+GET http://localhost:3001/api/user/slugs
+Cookie: ring-session=ac5cc944-e208-4448-ac49-f42ad20b8de2
+
+# POST http://localhost:3001/api/redirect/
+# Content-Type: application/json
+# Cookie: ring-session=42e2de16-8ac0-4a78-8f3e-5f5b11e5a3c3
+
+# {
+#     "url": "https://clojure.org"
+# }
+
+
+# POST http://localhost:3001/api/user/verify
+# Content-Type: application/json
+
+# {
+#     "firebase-uid": "test-uid-123",
+#     "email": "test@example.com",
+#     "display-name": "Test User"
+# }
+
+
+# POST http://localhost:3001/api/redirect/
+# Content-Type: application/json
+
+# {
+#     "url": "https://clojure.org"
+# }
+
+# POST http://localhost:3001/api/user/verify
+# Content-Type: application/json
+# {"firebase-uid":"test-uid-123","email":"test@example.com","display-name":"Test User"}
+
 # GET http://localhost:3001/
 
 # POST http://localhost:3001/api/redirect/

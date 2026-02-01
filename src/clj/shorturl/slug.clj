@@ -15,6 +15,7 @@
   (and
    (string? slug)
    (>= (count slug) 6)
+   (<= (count slug) 20)
    (boolean (re-matches #"^[A-Za-z0-9_-]+$" slug))))
 
 (defn generate-slug
