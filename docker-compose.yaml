@@ -4,8 +4,8 @@ services:
     expose:
       - 3001
     environment:
-      - VIRTUAL_HOST=hitoiki.co,www.hitoiki.co
-      - LETSENCRYPT_HOST=hitoiki.co,www.hitoiki.co
+      - VIRTUAL_HOST=su.hitoiki.co
+      - LETSENCRYPT_HOST=su.hitoiki.co
       - VIRTUAL_PORT=3001
       # Database credentials
       - SHORTURL_DB_USER=${NEON_DB_USER}
@@ -13,6 +13,8 @@ services:
       - SSL=true
       - SSLMODE=require
     restart: unless-stopped
+    networks:
+      -nginx-prxy
 
   # Nginx reverse proxy
   nginx-proxy:
