@@ -1,4 +1,6 @@
 {:linters {:unused-namespace {:level :warning}
+           :unused-binding {:level :warning
+                            :exclude-destructured-keys-in-fn-args true}
            :unused-referred-var {:level :warning}
            :unused-private-var {:level :warning}
            :consistent-alias {:level :warning
