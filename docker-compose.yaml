@@ -13,6 +13,8 @@ services:
       - SSL=true
       - SSLMODE=require
     restart: unless-stopped
+    networks:              # ADD THIS
+      - nginx-proxy        # ADD THIS
 
   # Nginx reverse proxy
   nginx-proxy:
@@ -27,6 +29,8 @@ services:
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
     restart: unless-stopped
+    networks:              # ADD THIS
+      - nginx-proxy        # ADD THIS
 
   # Let's Encrypt companion
   acme-companion:
@@ -43,12 +47,18 @@ services:
     depends_on:
       - nginx-proxy
     restart: unless-stopped
+    networks:              # ADD THIS
+      - nginx-proxy        # ADD THIS
 
 volumes:
   certs:
   vhost:
   html:
   acme:
+
+networks:                  # ADD THIS ENTIRE SECTION
+  nginx-proxy:
+    external: true
 
 
 # Minimal docker-compose to build locally (no nginx no acme no SSL)
