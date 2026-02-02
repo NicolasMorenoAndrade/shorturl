@@ -69,57 +69,58 @@
     (r/status (r/response {:error "Slug is required"}) 400)))
 
 (defn create-redirect
-  "Creates a new shortened URL.
-
-   If the user is authenticated (has firebase_uid in session), the URL will be
-   associated with their account. Otherwise, it's created as an anonymous URL.
-
-   Takes a URL from the request body, generates a unique slug (or uses custom slug),
-   stores the mapping in the database, and returns the slug.
-
-   Returns a 400 error if no URL is provided, is empty, or is invalid.
-   Custom slugs must be at least 6 characters long."
   [req]
   (let [url (get-in req [:body-params :url])
         custom-slug (get-in req [:body-params :slug])
         sanitized-url (when url (sanitize-url url))
         sanitized-slug (when custom-slug (sanitize-custom-slug custom-slug))
-        ;; Get firebase_uid from session (nil if not authenticated)
         firebase-uid (get-in req [:session :firebase-uid])
-        ;; Look up user_id if authenticated
-        user-id (when firebase-uid (db/get-user-id-by-firebase-uid firebase-uid))]
+        user-id (when firebase-uid (db/get-user-id-by-firebase-uid firebase-uid))
+        anon-count (get-in req [:session :anon-url-count] 0)
+        anon-limit-reached? (and (nil? firebase-uid) (>= anon-count 1))]
+
+    ;; (println "=== DEBUG ===")
+    ;; (println "Session:" (:session req))
+    ;; (println "Firebase UID:" firebase-uid)
+    ;; (println "Anon count:" anon-count)
+    ;; (println "Limit reached?" anon-limit-reached?)
 
     (cond
+      anon-limit-reached?
+      (r/status (r/response
+                 {:error "Anonymous users limited to 1 URL. Please sign in for unlimited URLs."}) 403)
+
       (nil? url)
       (r/status (r/response {:error "URL is required"}) 400)
 
       (empty? url)
       (r/status (r/response {:error "URL cannot be empty"}) 400)
 
-      ;; URL is invalid
       (nil? sanitized-url)
       (r/status (r/response {:error "Invalid URL format or potentially unsafe URL"}) 400)
 
-      ;; Custom slug provided but invalid
       (and custom-slug (nil? sanitized-slug))
       (r/status (r/response
-                 {:error (str "slug must be between 6 and 20 characters long and contain only "
-                              "letters, numbers, underscores and dashes.")}) 400)
+                 {:error "slug must be between 6 and 20 characters..."}) 400)
 
-      ;; Custom slug provided and valid
+      ;; Custom slug - UPDATE SESSION HERE TOO
       sanitized-slug
       (try
         (db/insert-url-redirection! sanitized-url sanitized-slug user-id)
-        (r/response {:slug sanitized-slug :url sanitized-url})
+        (-> (r/response {:slug sanitized-slug :url sanitized-url})
+            (assoc-in [:session :anon-url-count]
+                      (if (nil? firebase-uid) (inc anon-count) 0)))  ; ADD THIS
         (catch Exception e
           (r/status (r/response {:error (.getMessage e)}) 500)))
 
-      ;; Auto-generate slug
+      ;; Auto-generate slug - already has session update
       :else
       (try
         (let [slug (generate-slug)]
           (db/insert-url-redirection! sanitized-url slug user-id)
-          (r/response {:slug slug :url sanitized-url}))
+          (-> (r/response {:slug slug :url sanitized-url})
+              (assoc-in [:session :anon-url-count]
+                        (if (nil? firebase-uid) (inc anon-count) 0))))
         (catch Exception e
           (r/status (r/response {:error (.getMessage e)}) 500))))))
 

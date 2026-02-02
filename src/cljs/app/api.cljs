@@ -11,6 +11,7 @@
      (p/let [response (js/fetch "/api/redirect/"
                                 (clj->js {:headers {:Content-Type "application/json"}
                                           :method "POST"
+                                          :credentials "same-origin"  ; IMPORTANT
                                           :body (js/JSON.stringify body)}))
              json-data (.json response)
              data (js->clj json-data :keywordize-keys true)]
