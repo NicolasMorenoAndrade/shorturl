@@ -93,7 +93,7 @@
                  :class-name (get-in styles [:result-section :link])}
                 redirect-link)
            (d/button {:class-name (get-in styles [:result-section :button])
-                      :on-click #(set-state {:slug nil :url "" :custom-slug ""})}
+                      :on-click #(set-state assoc :slug nil :url "" :custom-slug "")}
                      "Create Another Link"))))
 
 (defnc UserSlugsSection [{:keys [state set-state]}]
