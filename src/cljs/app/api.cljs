@@ -1,5 +1,20 @@
 (ns app.api
   (:require [promesa.core :as p]))
+;; ============================================================================
+;; CSRF Token Handling
+;; ============================================================================
+
+(defn get-csrf-token
+  "Reads CSRF token from meta tag injected by server"
+  []
+  (when-let [meta-tag (js/document.querySelector "meta[name='csrf-token']")]
+    (.getAttribute meta-tag "content")))
+
+
+;; ============================================================================
+;; API Functions
+;; ============================================================================
+
 
 (defn fetch-slug
   "Creates a shortened URL by calling the backend API.
@@ -9,7 +24,8 @@
                 #js {:url url}
                 #js {:url url :slug slug})]
      (p/let [response (js/fetch "/api/redirect/"
-                                (clj->js {:headers {:Content-Type "application/json"}
+                                (clj->js {:headers {:Content-Type "application/json"
+                                                    :X-CSRF-Token (get-csrf-token)}
                                           :method "POST"
                                           :credentials "same-origin"  ; IMPORTANT
                                           :body (js/JSON.stringify body)}))
@@ -27,7 +43,8 @@
    - firebase-user: Map containing Firebase authentication data (:uid, :email, :display-name)"
   [firebase-user]
   (p/let [response (js/fetch "/api/user/verify"
-                             (clj->js {:headers {:Content-Type "application/json"}
+                             (clj->js {:headers {:Content-Type "application/json"
+                                                 :X-CSRF-Token (get-csrf-token)}
                                        :method "POST"
                                        :body (js/JSON.stringify
                                               #js {:firebase-uid (:uid firebase-user)
@@ -64,7 +81,8 @@
   [slug]
   (p/let [response (js/fetch (str "/api/redirect/" slug "/")
                              (clj->js {:method "DELETE"
-                                       :credentials "same-origin"}))
+                                       :credentials "same-origin"
+                                       :headers {:X-CSRF-Token (get-csrf-token)}}))
           json-data (.json response)
           data (js->clj json-data :keywordize-keys true)]
     data))

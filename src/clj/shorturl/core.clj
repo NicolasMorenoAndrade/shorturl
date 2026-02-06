@@ -5,10 +5,13 @@
             [muuntaja.core :as m]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [ring.middleware.session :refer [wrap-session]]
+            [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]  ;; Add this
             [shorturl.db :as db]
             [shorturl.slug :refer [generate-slug sanitize-custom-slug sanitize-url]]
             [shorturl.migrations :as migrations]
-            [clojure.java.io :as io])
+            [shorturl.session :as session]  ;; Add this
+            [clojure.java.io :as io]
+            [clojure.string :as str])
   (:gen-class))
 
 (defn verify-user
@@ -172,13 +175,25 @@
           (r/status (r/response {:error (.getMessage e)}) 500)))
       (r/status (r/response {:error "Authentication required"}) 401))))
 
+;; (defn serve-index
+;;   "Serves the main application HTML page from resources."
+;;   []
+;;   (slurp (io/resource "public/index.html")))
+
 (defn serve-index
-  "Serves the main application HTML page from resources."
+  "Serves the main application HTML page with CSRF token injected."
   []
-  (slurp (io/resource "public/index.html")))
+  (let [html (slurp (io/resource "public/index.html"))
+        csrf-token ring.middleware.anti-forgery/*anti-forgery-token*]
+    ;; Inject CSRF token as meta tag
+    (str/replace html
+                 "</head>"
+                 (str "<meta name=\"csrf-token\" content=\""
+                      csrf-token
+                      "\" /></head>"))))
 
 (def app
-  "The main Ring handler for the application.
+  "The main Ring handler with CSRF protection enabled.
 
    Routes:
    - /:slug/ - Redirects to the original URL for the given slug
@@ -209,7 +224,11 @@
                 :middleware [muuntaja/format-middleware]}})
        (ring/create-default-handler
         {:not-found (fn [_] {:status 404, :body "Not found"})}))
-      wrap-session))
+      ;; Session middleware with PostgreSQL backing
+      (wrap-session session/session-config)
+
+      )
+  )
 
 
 (defonce server

@@ -1,6 +1,7 @@
 (ns shorturl.migrations
   (:require [shorturl.db :refer [execute-query]]
-            [honey.sql :as sql]))
+            [honey.sql :as sql]
+            [honey.sql.helpers :as h]))
 
 (defn drop-all-tables!
   "Drops all application tables in the correct order.
@@ -13,6 +14,31 @@
   (execute-query ["DROP TABLE IF EXISTS shortened_urls CASCADE"])
   (execute-query ["DROP TABLE IF EXISTS users CASCADE"])
   (println "All tables dropped."))
+(defn create-sessions-table!
+  "Creates the sessions table for persistent session storage."
+  []
+  (execute-query
+   ["CREATE TABLE IF NOT EXISTS sessions (
+       id TEXT PRIMARY KEY,
+       data TEXT NOT NULL,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     )"])
+
+  ;; Index for cleanup queries
+  (execute-query
+   ["CREATE INDEX IF NOT EXISTS idx_sessions_updated_at
+     ON sessions(updated_at)"]))
+
+(defn drop-all-tables!
+  "Drops all application tables in the correct order."
+  []
+  (println "Dropping all tables...")
+  (execute-query ["DROP TABLE IF EXISTS sessions CASCADE"])  ;; Add this line
+  (execute-query ["DROP TABLE IF EXISTS shortened_urls CASCADE"])
+  (execute-query ["DROP TABLE IF EXISTS users CASCADE"])
+  (println "All tables dropped."))
+
 
 (defn create-users-table!
   "Creates the users table if it doesn't exist."
@@ -39,20 +65,29 @@
        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
      )"]))
 
+;; (defn run-migrations!
+;;   "Runs all migrations to set up the database schema.
+;;    This should be called during application initialization."
+;;   []
+;;   (println "Running database migrations...")
+;;   (create-users-table!)
+;;   (create-shortened-urls-table!)
+;;   (println "Migrations complete."))
+
 (defn run-migrations!
-  "Runs all migrations to set up the database schema.
-   This should be called during application initialization."
+  "Runs all migrations to set up the database schema."
   []
   (println "Running database migrations...")
   (create-users-table!)
   (create-shortened-urls-table!)
+  (create-sessions-table!)  ;; Add this line
   (println "Migrations complete."))
 
 (comment
   ;; Development helpers
 
   ;; Reset entire database (DESTRUCTIVE!)
-  (drop-all-tables!)
+  ;; (drop-all-tables!)
 
   (run-migrations!)
 
@@ -62,7 +97,8 @@
     {:select [:table_name :column_name :data_type :is_nullable]
      :from [:information_schema.columns]
      :where [:and
-             [:in :table_name ["users" "shortened_urls"]]
+             [:in :table_name ["users" "shortened_urls" "sessions"]]
              [:= :table_schema "public"]]
      :order-by [:table_name :ordinal_position]}))
+
   )
